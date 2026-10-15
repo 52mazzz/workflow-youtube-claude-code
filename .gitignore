@@ -1,0 +1,72 @@
+youtube-credentials.json
+*.token.json
+youtube_oauth_token.json
+youtube_client_secrets.json
+.tmp/
+__pycache__/
+client_secret*.json
+
+# Production : brouillons lourds par vidéo
+videos/*/veille/
+videos/*/miniatures-refs/
+
+# Montage : médias lourds et régénérables (le dépôt garde le savoir-faire, pas les médias)
+montage/01_RUSHS/
+# 02_ANALYSE : textes partagés entre les deux PC (transcriptions, prises, coupes, rapports) ;
+# voix nettoyées, pistes audio et autres gros fichiers restent sur le fixe
+montage/02_ANALYSE/**
+!montage/02_ANALYSE/**/
+!montage/02_ANALYSE/**/*.txt
+!montage/02_ANALYSE/**/*.json
+!montage/02_ANALYSE/**/*.md
+montage/05_EXPORTS/
+montage/06_CAPCUT/
+montage/99_ARCHIVE/
+montage/04_RESSOURCES/assets/*
+montage/04_RESSOURCES/images/
+montage/04_RESSOURCES/musiques/a_ecouter/
+montage/08_HYPERFRAMES/.whisper/
+montage/08_HYPERFRAMES/assets/shorts/
+montage/08_HYPERFRAMES/build/
+montage/08_HYPERFRAMES/renders/
+montage/08_HYPERFRAMES/node_modules/
+montage/08_HYPERFRAMES/.hyperframes/
+montage/_sauvegardes_claude/
+*.pyc
+*.wav
+*.mp4
+*.mkv
+*.mov
+.env
+.DS_Store
+Thumbs.db
+
+# Bruitages du kit : petits, nécessaires sur les deux PC (Kenney CC0, synthèse, Pixabay)
+!montage/08_HYPERFRAMES/assets/sfx/*.wav
+!montage/04_RESSOURCES/sfx/**/*.wav
+!montage/04_RESSOURCES/assets/fond_pinterest.jpg
+# Réglages locaux de l'éditeur, hors des dossiers de production.
+.obsidian/
+# Sources de référence brutes gardées localement ; analyses et manifestes dans Git.
+config/youtube/references/**/*.vtt
+videos/*/accroches-references-brut.json
+
+# Copie publique : ne jamais publier (identifiants, médias sous droits, pont CapCut sans licence)
+secrets/
+*.enc
+montage/04_RESSOURCES/musiques/
+montage/04_RESSOURCES/sfx/perso/
+montage/04_RESSOURCES/sfx/pixabay/
+montage/07_OUTILS/
+montage/08_HYPERFRAMES/assets/vendor/
+
+# Copie publique : données de la chaîne et de production, jamais publiées
+videos/
+config/youtube/
+montage/02_ANALYSE/
+montage/04_RESSOURCES/assets/
+montage/08_HYPERFRAMES/videos/*
+!montage/08_HYPERFRAMES/videos/_modele/
+!montage/08_HYPERFRAMES/videos/_exemple/
+!montage/08_HYPERFRAMES/videos/_exemple-direction/
+montage/08_HYPERFRAMES/shorts/

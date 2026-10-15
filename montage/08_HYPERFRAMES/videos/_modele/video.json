@@ -1,0 +1,54 @@
+{
+ "_aide": "Copier ce dossier en videos/<id>/ et remplir. Temps en secondes de la timeline dérushée du projet « projet » (lue sans ouvrir CapCut). Direction « duel lisible et nerveux » (2026-10-07, montage-capcut preferences.md) : ouverture = une recette de scripts/variete.py, musique à la voix − musique_sous_voix dB coupée net seulement sur les moments forts, aucun sous-titre, sfx sur les événements du jeu, zooms punch [seconde, durée, échelle, fx, fy, pourquoi] : légers 1,08 à 1,15 et un zoom de lecture 1,5 à 3 par minute, jamais deux à moins de 2 s ; slow = respiration des séquences de jeu (2026-10-08) ; entree « eclaircissement » (hook) ou \"\". Rendu final : python scripts/rendu.py <id> ; vérifier avec variete.py, dosage.py, revue.py. Exemple réel rendu : videos/_exemple-direction/.",
+ "ouverture": "",
+ "titre": "",
+ "projet": "<id> - final",
+ "projet_source": "<id>",
+ "transcription": "capcut_<id> - final.json",
+ "coupes": [],
+ "musiques": [
+  [
+   "hook",
+   0.0,
+   14.0,
+   "perso/hook.mp3",
+   0.0,
+   3.0
+  ]
+ ],
+ "declics": [],
+ "sfx": [],
+ "musique_sous_voix": 13,
+ "coupe": "net",
+ "sous_titres": {
+  "fix": {},
+  "phrases": []
+ },
+ "transitions": [],
+ "zooms": {
+  "punch": [
+   [
+    25.0,
+    1.2,
+    1.12,
+    0.5,
+    0.5,
+    "« regarde ça » : le résultat"
+   ],
+   [
+    62.0,
+    2.0,
+    1.8,
+    0.3,
+    0.2,
+    "zoom de lecture : le chiffre du jeu"
+   ]
+  ],
+  "slow": {
+   "scale": 1.08,
+   "periode": 14.0,
+   "min_dur": 5.0
+  }
+ },
+ "entree": "eclaircissement"
+}

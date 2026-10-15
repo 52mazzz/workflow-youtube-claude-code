@@ -1,0 +1,42 @@
+{
+ "elements": [
+  {
+   "id": "tr01-transition",
+   "type": "glisse_gauche",
+   "at": 23.55,
+   "dur": 0.5,
+   "coupe": 23.8,
+   "note": "saut de scène",
+   "vars": {
+    "sens": "gauche",
+    "A": [
+     "~/Documents/TSAR/Rush/2026-10-05 21-37-49.mkv",
+     10.867
+    ],
+    "B": [
+     "~/Documents/TSAR/Rush/2026-10-05 21-37-49.mkv",
+     19.4
+    ]
+   }
+  },
+  {
+   "id": "tr02-transition",
+   "type": "glisse_haut",
+   "at": 29.65,
+   "dur": 0.5,
+   "coupe": 29.9,
+   "note": "saut de scène",
+   "vars": {
+    "sens": "haut",
+    "A": [
+     "~/Documents/TSAR/Rush/2026-10-05 21-37-49.mkv",
+     30.333
+    ],
+    "B": [
+     "~/Documents/TSAR/Rush/2026-10-05 21-37-49.mkv",
+     42.467
+    ]
+   }
+  }
+ ]
+}

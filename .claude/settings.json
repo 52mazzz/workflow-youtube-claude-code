@@ -1,0 +1,31 @@
+{
+  "env": {
+    "PYTHONDONTWRITEBYTECODE": "1"
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"$CLAUDE_PROJECT_DIR\" && PY=$(sh skills/nouvelle-video/scripts/find_python.sh) && echo \"État du dépôt au démarrage (repo.py etat). Si un bilan est dû, propose-le à l'utilisateur dans ta première réponse (skill bilan-video) ; un fichier videos/<id>/bilans/*-auto.txt veut dire que la tâche quotidienne a déjà collecté les chiffres.\" && PYTHONUTF8=1 PYTHONIOENCODING=utf8 \"$PY\" skills/nouvelle-video/scripts/repo.py etat",
+            "timeout": 60
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"$CLAUDE_PROJECT_DIR\" && PY=$(sh skills/nouvelle-video/scripts/find_python.sh) && PYTHONUTF8=1 \"$PY\" .claude/hooks/garde.py",
+            "timeout": 20
+          }
+        ]
+      }
+    ]
+  }
+}

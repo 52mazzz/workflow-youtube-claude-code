@@ -1,0 +1,21 @@
+{
+ "note": "Copie publique : deux exemples fictifs. Dans le dépôt de travail, ce fichier liste les ouvertures réellement publiées (ce qui est dit dans les 15 premières secondes, transcription brute du montage final) et leur rétention à 30 s ; bilan-video y ajoute une vidéo à chaque bilan J+7. Lu par « hookscore.py --calibrer » : sous 8 vidéos, c'est un garde-fou, pas un calibrage.",
+ "videos": [
+  {
+   "id": "exemple-duel-ia",
+   "publiee": "2026-01-01",
+   "retention_30s": 62.0,
+   "bilan": "exemple fictif",
+   "ouverture": "Ce jeu, une IA l'a créé de zéro. J'ai donné exactement le même prompt à Claude et à ChatGPT, et on va voir lequel s'en sort le mieux.",
+   "source": "exemple fictif de la copie publique"
+  },
+  {
+   "id": "exemple-mod-ia",
+   "publiee": "2026-01-08",
+   "retention_30s": 48.0,
+   "bilan": "exemple fictif",
+   "ouverture": "Aujourd'hui, je demande à une IA de créer un mod Minecraft complet. Je ne touche pas au code : une seule phrase, et on regarde ce qui sort.",
+   "source": "exemple fictif de la copie publique"
+  }
+ ]
+}

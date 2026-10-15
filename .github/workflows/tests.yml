@@ -1,0 +1,26 @@
+name: tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  scripts:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python: ["3.9", "3.12"]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      # the scripts under test use the standard library, except the vault (cryptography) and miniature.py (OpenCV); no network in tests
+      - name: Install cryptography and OpenCV
+        run: python -m pip install -q cryptography opencv-python-headless numpy
+      - name: Run tests
+        env:
+          SWIPE_OFFLINE: "1"
+        run: python -m unittest discover -s tests -v

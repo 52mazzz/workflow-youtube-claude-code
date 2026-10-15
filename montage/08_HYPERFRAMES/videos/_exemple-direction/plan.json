@@ -1,0 +1,247 @@
+{
+ "_aide": "Exemple rendu de la direction sur glacon-ia (39,3 s), temps calés au mot près (phrases.py glacon-ia) : accroche (partage, capture de la consigne à zones, titre, duel, accéléré sur les générations ×10), un test par IA (carte, pastille qui passe au rouge puis au vert, Tsar, flèche, mot), verdict (deux notes).",
+ "plans": [
+  {
+   "rush": "2026-10-05 21-37-49",
+   "at": 2.2,
+   "dur": 2.567,
+   "src": 30.0
+  },
+  {
+   "rush": "2026-10-04 18-38-17",
+   "at": 4.767,
+   "dur": 1.733,
+   "src": 40.0,
+   "vitesse": 10
+  },
+  {
+   "rush": "2026-10-05 21-06-11",
+   "at": 6.5,
+   "dur": 1.8,
+   "src": 40.0,
+   "vitesse": 10
+  }
+ ],
+ "elements": [
+  {
+   "id": "a01-partage",
+   "type": "partage",
+   "at": 0.0,
+   "dur": 2.2,
+   "vars": {
+    "A": [
+     "2026-10-05 21-37-49",
+     23.9
+    ],
+    "B": [
+     "2026-10-04 19-00-18",
+     28.0
+    ],
+    "nomA": "CLAUDE",
+    "nomB": "CHATGPT",
+    "flou": "b"
+   }
+  },
+  {
+   "id": "a02-capture-consigne",
+   "type": "capture",
+   "at": 2.2,
+   "dur": 2.567,
+   "vars": {
+    "image": "assets/shorts/glacon-ia_1/captures/consigne.png",
+    "zones": [
+     [
+      0.9,
+      0.015,
+      0.03,
+      0.8,
+      0.1
+     ]
+    ],
+    "largeur": 1300
+   }
+  },
+  {
+   "id": "a03-titre",
+   "type": "titre_jeu",
+   "at": 4.767,
+   "dur": 1.2,
+   "vars": {
+    "texte": "SAUVE LE GLAÇON"
+   }
+  },
+  {
+   "id": "a04-duel",
+   "type": "duel",
+   "at": 5.967,
+   "dur": 2.333,
+   "vars": {
+    "nomA": "CLAUDE",
+    "logoA": "claude",
+    "couleurA": "#E07A5A",
+    "a": 0.0,
+    "nomB": "CHATGPT",
+    "logoB": "chatgpt",
+    "couleurB": "#3CCFB0",
+    "b": 0.45,
+    "vs": 0.95
+   }
+  },
+  {
+   "id": "a05-accelere",
+   "type": "accelere",
+   "at": 4.767,
+   "dur": 3.533,
+   "vars": {
+    "texte": "×10"
+   }
+  },
+  {
+   "id": "c01-carte-chatgpt",
+   "type": "carte",
+   "at": 8.3,
+   "dur": 12.267,
+   "vars": {
+    "texte": "CHATGPT",
+    "fond": "#1E9E7E",
+    "logo": "chatgpt",
+    "plein": 1.2
+   }
+  },
+  {
+   "id": "c02-pastille-chatgpt",
+   "type": "pastille",
+   "at": 9.6,
+   "dur": 10.967,
+   "vars": {
+    "texte": "Le jeu de ChatGPT",
+    "etat": [
+     [
+      1.88,
+      "rate"
+     ],
+     [
+      8.94,
+      "ok"
+     ]
+    ]
+   }
+  },
+  {
+   "id": "c03-tsar-merde",
+   "type": "reaction",
+   "at": 11.5,
+   "dur": 1.9,
+   "vars": {
+    "humeur": "rire"
+   }
+  },
+  {
+   "id": "c04-fleche-saut",
+   "type": "fleche",
+   "at": 13.34,
+   "dur": 1.9,
+   "vars": {
+    "texte": "Double saut",
+    "x": 0.38,
+    "y": 0.64,
+    "cote": "droite"
+   }
+  },
+  {
+   "id": "d01-carte-claude",
+   "type": "carte",
+   "at": 20.567,
+   "dur": 14.333,
+   "vars": {
+    "texte": "CLAUDE",
+    "fond": "#D97757",
+    "logo": "claude",
+    "plein": 1.2
+   }
+  },
+  {
+   "id": "d02-pastille-claude",
+   "type": "pastille",
+   "at": 21.9,
+   "dur": 13.0,
+   "vars": {
+    "texte": "Le jeu de Claude",
+    "etat": [
+     [
+      8.68,
+      "rate"
+     ],
+     [
+      9.82,
+      "ok"
+     ]
+    ]
+   }
+  },
+  {
+   "id": "d03-mot-musiques",
+   "type": "mot",
+   "at": 26.72,
+   "dur": 1.2,
+   "vars": {
+    "texte": "DES MUSIQUES"
+   }
+  },
+  {
+   "id": "d04-tsar-aie",
+   "type": "reaction",
+   "at": 30.58,
+   "dur": 1.9,
+   "vars": {
+    "humeur": "gene"
+   }
+  },
+  {
+   "id": "v01-note-chatgpt",
+   "type": "note",
+   "at": 34.9,
+   "dur": 2.2,
+   "vars": {
+    "nom": "CHATGPT",
+    "logo": "chatgpt",
+    "couleur": "#3CCFB0",
+    "note": "7/10",
+    "points": [
+     [
+      "+",
+      "Le double saut"
+     ],
+     [
+      "-",
+      "Vite fini"
+     ]
+    ],
+    "a": 0.4
+   }
+  },
+  {
+   "id": "v02-note-claude",
+   "type": "note",
+   "at": 37.1,
+   "dur": 2.233,
+   "vars": {
+    "nom": "CLAUDE",
+    "logo": "claude",
+    "couleur": "#E07A5A",
+    "note": "9/10",
+    "points": [
+     [
+      "+",
+      "Musiques et bruitages"
+     ],
+     [
+      "+",
+      "Rejouable"
+     ]
+    ],
+    "a": 0.4
+   }
+  }
+ ]
+}

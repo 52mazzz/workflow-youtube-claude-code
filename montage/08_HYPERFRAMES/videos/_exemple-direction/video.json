@@ -1,0 +1,85 @@
+{
+ "_aide": "Exemple réel complet de la direction « duel lisible et nerveux » en rendu direct (2026-10-08) : le dérush du Short glacon-ia (projet CapCut « glacon-ia », lu seulement, jamais modifié) monté avec tous les éléments de la direction. Refaire (depuis scripts/, id _exemple-direction) : voix.py, transitions.py, zooms.py, combler.py, export_capcut.py _exemple-direction ../videos/_exemple-direction/plan.json ../videos/_exemple-direction/transitions.json, audio.py, rendu.py, revue.py.",
+ "titre": "Exemple direction (glacon-ia)",
+ "projet": "glacon-ia",
+ "projet_source": "glacon-ia",
+ "transcription": "capcut_glacon-ia.json",
+ "coupes": [],
+ "musiques": [
+  [
+   "hook",
+   0.0,
+   8.3,
+   "perso/hook.mp3",
+   0.0,
+   1.35
+  ],
+  [
+   "chatgpt",
+   8.3,
+   20.567,
+   "perso/quirky.mp3",
+   0.0,
+   0.0
+  ],
+  [
+   "claude",
+   20.567,
+   34.9,
+   "perso/tribal jazz.mp3",
+   0.0,
+   0.0
+  ],
+  [
+   "verdict",
+   34.9,
+   39.333,
+   "perso/hook.mp3",
+   8.0,
+   0.0
+  ]
+ ],
+ "declics": [],
+ "sfx": [],
+ "musique_sous_voix": 13,
+ "coupe": "net",
+ "sous_titres": {
+  "fix": {},
+  "phrases": []
+ },
+ "transitions": [],
+ "zooms": {
+  "punch": [
+   [
+    14.66,
+    1.0,
+    1.12,
+    0.25,
+    0.2,
+    "« on reprend de la vie » : la réserve de froid"
+   ],
+   [
+    24.72,
+    1.6,
+    1.6,
+    0.55,
+    0.5,
+    "« les petits flocons » : zoom de lecture sur le glaçon et ses flocons"
+   ],
+   [
+    31.72,
+    1.0,
+    1.1,
+    0.5,
+    0.55,
+    "« Let's go ! » : l'arrivée"
+   ]
+  ],
+  "slow": {
+   "scale": 1.08,
+   "periode": 14.0,
+   "min_dur": 5.0
+  }
+ },
+ "entree": "eclaircissement"
+}

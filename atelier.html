@@ -1,0 +1,719 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="jeton" content="__JETON__">
+<title>Atelier TSAR</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23c8102e'/%3E%3Cpath d='M9 10h14M16 10v13' stroke='white' stroke-width='3.4' stroke-linecap='round'/%3E%3C/svg%3E">
+<style>
+:root {
+  color-scheme: light;
+  --bg: #f5f4f1; --surface: #ffffff; --surface-2: #f0eee9; --border: #e2ded7; --border-fort: #cfc9bf;
+  --text: #1c1a17; --muted: #6a645b; --faible: #9a938a;
+  --accent: #c8102e; --accent-texte: #ffffff; --accent-doux: #fbe8eb;
+  --ok: #1d7a4b; --ok-doux: #e4f3ea; --attention: #9a5a00; --attention-doux: #fcf0dc;
+  --info: #1f5ea8; --info-doux: #e6effa;
+  --ombre: 0 1px 2px rgba(28, 26, 23, .05), 0 4px 14px rgba(28, 26, 23, .05);
+  --rayon: 12px;
+  --mono: ui-monospace, "Cascadia Code", "Cascadia Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --bg: #131211; --surface: #1c1b19; --surface-2: #252320; --border: #312e2a; --border-fort: #45413b;
+    --text: #ece8e2; --muted: #a39d93; --faible: #6f6a62;
+    --accent: #ff4b5c; --accent-texte: #1c0b0e; --accent-doux: #3a191e;
+    --ok: #52c48c; --ok-doux: #15291e; --attention: #f2a83b; --attention-doux: #33260f;
+    --info: #74aef2; --info-doux: #162638;
+    --ombre: 0 1px 2px rgba(0, 0, 0, .3), 0 4px 14px rgba(0, 0, 0, .25);
+  }
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background: var(--bg); color: var(--text);
+  font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: inherit; }
+code, .mono { font-family: var(--mono); font-size: .86em; }
+button { font: inherit; color: inherit; }
+h1, h2, h3 { margin: 0; line-height: 1.25; }
+h2 { font-size: 13px; font-weight: 650; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+h3 { font-size: 13px; font-weight: 650; color: var(--muted); margin: 18px 0 8px; }
+
+/* ─── barre du haut */
+.barre { position: sticky; top: 0; z-index: 5; background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); }
+.barre-int { max-width: 1280px; margin: 0 auto; padding: 12px 20px; display: flex; align-items: center; gap: 16px; }
+.marque { display: flex; align-items: center; gap: 10px; text-decoration: none; margin-right: auto; }
+.logo { width: 32px; height: 32px; border-radius: 9px; background: var(--accent); display: grid; place-items: center; flex: none; }
+.logo svg { width: 18px; height: 18px; }
+.marque strong { font-size: 17px; letter-spacing: -.01em; }
+.marque .sous { color: var(--muted); font-size: 13px; margin-left: 8px; }
+.pc { color: var(--muted); font-size: 13px; text-align: right; line-height: 1.3; }
+.pc strong { color: var(--text); font-weight: 600; }
+
+/* ─── mise en page */
+.page { max-width: 1280px; margin: 0 auto; padding: 24px 20px 64px; }
+.accueil { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 24px; align-items: start; }
+.colonne { display: flex; flex-direction: column; gap: 24px; min-width: 0; }
+.colonne-pc { position: sticky; top: 78px; }
+@media (max-width: 980px) {
+  .accueil { grid-template-columns: 1fr; }
+  .colonne-pc { position: static; }
+}
+.bloc > h2, .bloc > summary { margin-bottom: 12px; }
+.carte { background: var(--surface); border: 1px solid var(--border); border-radius: var(--rayon); box-shadow: var(--ombre); padding: 18px 20px; }
+.carte > h2 { margin-bottom: 14px; }
+.vide { color: var(--muted); margin: 0; }
+.compte { display: inline-block; min-width: 20px; padding: 0 6px; border-radius: 10px; background: var(--surface-2);
+  color: var(--muted); font-size: 12px; text-align: center; letter-spacing: 0; margin-left: 4px; }
+
+/* ─── boutons */
+.bouton { display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px; border-radius: 8px; cursor: pointer;
+  background: var(--surface); border: 1px solid var(--border-fort); font-size: 14px; font-weight: 550; white-space: nowrap;
+  text-decoration: none; transition: background .12s, border-color .12s; }
+.bouton:hover { background: var(--surface-2); }
+.bouton:disabled { opacity: .5; cursor: default; }
+.bouton.principal { background: var(--accent); border-color: var(--accent); color: var(--accent-texte); }
+.bouton.principal:hover { filter: brightness(1.06); }
+.bouton.petit { padding: 4px 9px; font-size: 13px; }
+.bouton.icone { padding: 4px 10px; font-size: 18px; line-height: 1; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.phrase { display: inline-flex; align-items: center; gap: 8px; max-width: 100%; padding: 6px 10px 6px 12px; border-radius: 8px;
+  background: var(--accent-doux); color: var(--text); border: 1px solid transparent; cursor: pointer; font-size: 14px;
+  text-align: left; transition: border-color .12s; }
+.phrase:hover { border-color: var(--accent); }
+.phrase .texte { font-weight: 600; overflow-wrap: anywhere; }
+.phrase .guillemet { color: var(--accent); font-weight: 700; }
+.phrase svg { width: 15px; height: 15px; flex: none; color: var(--accent); }
+
+.badge { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+.badge-en-cours { background: var(--info-doux); color: var(--info); }
+.badge-programmee { background: var(--attention-doux); color: var(--attention); }
+.badge-publiee, .badge-terminee { background: var(--ok-doux); color: var(--ok); }
+.badge-pause { background: var(--surface-2); color: var(--muted); }
+.etiquette { font-size: 12px; font-weight: 650; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-right: 8px; }
+.etape-num { display: inline-block; min-width: 26px; padding: 0 5px; border-radius: 6px; background: var(--surface-2);
+  font-size: 12px; font-weight: 650; text-align: center; color: var(--muted); margin-right: 4px; }
+
+.chargement { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 14px; }
+.roue { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--border-fort); border-top-color: var(--accent);
+  animation: tourne .8s linear infinite; flex: none; }
+@keyframes tourne { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .roue { animation-duration: 3s; } }
+
+/* ─── à faire */
+.alertes { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.alerte { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 12px 14px; border-radius: 10px;
+  background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--border-fort); }
+.alerte-bilan { border-left-color: var(--accent); }
+.alerte-publication { border-left-color: var(--attention); }
+.alerte-corps { flex: 1 1 280px; min-width: 0; }
+.alerte-corps .id { font-weight: 650; text-decoration: none; margin-right: 6px; }
+.alerte-corps .id:hover { text-decoration: underline; }
+.rangement { margin-top: 10px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px; }
+.rangement summary { cursor: pointer; font-size: 14px; color: var(--muted); }
+.rangement ul { margin: 10px 0 4px; padding-left: 18px; font-size: 13px; color: var(--muted); }
+.rangement li { margin: 4px 0; overflow-wrap: anywhere; }
+.rangement .phrase { margin-top: 8px; }
+.verif { margin-top: 10px; }
+
+/* ─── vidéos */
+.videos { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 14px; }
+.video { display: flex; flex-direction: column; gap: 14px; }
+.video-titre { font-size: 17px; font-weight: 650; text-decoration: none; letter-spacing: -.01em; line-height: 1.3; }
+.video-titre:hover { text-decoration: underline; }
+.meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-top: 6px; color: var(--muted); font-size: 13px; }
+.en-retard { color: var(--accent); font-weight: 600; }
+.segments { display: flex; gap: 3px; }
+.seg { flex: 1; height: 6px; border-radius: 3px; background: var(--surface-2); border: 1px solid var(--border); }
+.seg.fait { background: var(--ok); border-color: var(--ok); }
+.seg.courant { background: var(--accent); border-color: var(--accent); }
+.segments-legende { display: flex; justify-content: space-between; color: var(--muted); font-size: 12px; margin-top: 5px; }
+.prochaine { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; padding-top: 12px; border-top: 1px dashed var(--border); }
+.prochaine-quoi { font-size: 14px; }
+.liste { background: var(--surface); border: 1px solid var(--border); border-radius: var(--rayon); box-shadow: var(--ombre); }
+.ligne { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px 16px; align-items: center; padding: 12px 16px; }
+.ligne + .ligne { border-top: 1px solid var(--border); }
+.ligne .video-titre { font-size: 15px; }
+.ligne .segments { width: 120px; }
+.ligne-droite { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+@media (max-width: 640px) {
+  .ligne { grid-template-columns: 1fr; }
+  .ligne-droite { align-items: flex-start; }
+}
+details.pause > summary { cursor: pointer; list-style: none; }
+details.pause > summary::-webkit-details-marker { display: none; }
+details.pause > summary h2::before { content: "▸ "; }
+details.pause[open] > summary h2::before { content: "▾ "; }
+
+/* ─── deux PC */
+.pc-carte { display: flex; flex-direction: column; gap: 16px; }
+.pc-etat { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px; }
+.pc-etat li { padding: 8px 12px; border-radius: 8px; background: var(--attention-doux); color: var(--attention); font-size: 14px; font-weight: 550; }
+.a-jour { padding: 8px 12px; border-radius: 8px; background: var(--ok-doux); color: var(--ok); font-weight: 600; margin: 0; font-size: 14px; }
+.pc-section { border-top: 1px solid var(--border); padding-top: 14px; display: flex; flex-direction: column; gap: 10px; }
+.pc-section h3 { margin: 0; }
+.commits, .modifs { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; font-size: 13px;
+  max-height: 220px; overflow: auto; }
+.commits li { display: flex; flex-direction: column; }
+.commits .quand { color: var(--muted); font-size: 12px; }
+.modifs li { display: flex; gap: 8px; align-items: baseline; overflow-wrap: anywhere; }
+.modifs .code { flex: none; width: 66px; color: var(--muted); font-size: 12px; }
+.champ { width: 100%; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--border-fort); background: var(--bg);
+  color: var(--text); font: inherit; font-size: 14px; }
+.rangee { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.aide { color: var(--muted); font-size: 12.5px; margin: 0; }
+.sortie { margin: 0; padding: 10px 12px; border-radius: 8px; background: var(--surface-2); font-family: var(--mono); font-size: 12px;
+  white-space: pre-wrap; overflow-wrap: anywhere; max-height: 260px; overflow: auto; border-left: 3px solid var(--ok); }
+.sortie.echec { border-left-color: var(--accent); }
+.pied-pc { color: var(--muted); font-size: 12px; }
+
+/* ─── fiche */
+.retour { display: inline-block; color: var(--muted); text-decoration: none; font-size: 14px; margin-bottom: 14px; }
+.retour:hover { color: var(--text); }
+.fiche-tete { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; }
+.fiche-tete h1 { font-size: 26px; letter-spacing: -.02em; max-width: 800px; }
+.fiche-tete .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.suite { display: flex; align-items: center; justify-content: space-between; gap: 12px 20px; flex-wrap: wrap; margin-bottom: 20px;
+  padding: 14px 18px; border-radius: var(--rayon); background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--accent); box-shadow: var(--ombre); }
+.fiche-grille { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+@media (max-width: 980px) { .fiche-grille { grid-template-columns: 1fr; } }
+.pas-liste { list-style: none; margin: 0; padding: 0; }
+.pas { display: grid; grid-template-columns: 24px minmax(0, 1fr); gap: 12px; position: relative; padding-bottom: 14px; }
+.pas::before { content: ""; position: absolute; left: 11px; top: 24px; bottom: 0; width: 2px; background: var(--border); }
+.pas:last-child::before { display: none; }
+.pas-marque { width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--border-fort); background: var(--surface);
+  display: grid; place-items: center; font-size: 13px; font-weight: 700; z-index: 1; }
+.pas.fait .pas-marque { background: var(--ok); border-color: var(--ok); color: #fff; }
+.pas.fait::before { background: var(--ok); }
+.pas.courant .pas-marque { border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-doux); }
+.pas.courant .pas-marque::after { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+.pas-nom { font-weight: 600; padding-top: 1px; }
+.pas.fait .pas-nom { color: var(--muted); font-weight: 550; }
+.qui { color: var(--faible); font-weight: 450; font-size: 12.5px; margin-left: 4px; }
+.pas-detail { color: var(--muted); font-size: 13px; margin-top: 2px; }
+.pas.courant .pas-detail { color: var(--text); }
+.pas .phrase, .pas .bouton { margin-top: 8px; }
+.groupe:first-of-type h3 { margin-top: 0; }
+.fichiers-liste { list-style: none; margin: 0; padding: 0; }
+.fichier { display: flex; align-items: center; gap: 10px; width: 100%; padding: 7px 8px; border: 0; border-radius: 8px; background: none;
+  cursor: pointer; text-align: left; }
+.fichier:hover { background: var(--surface-2); }
+.fichier .ico { width: 30px; flex: none; font-family: var(--mono); font-size: 10.5px; font-weight: 700; color: var(--muted);
+  text-transform: uppercase; text-align: center; padding: 2px 0; border-radius: 4px; background: var(--surface-2); }
+.fichier .nom { font-weight: 550; font-size: 14px; overflow-wrap: anywhere; }
+.fichier .info { margin-left: auto; color: var(--muted); font-size: 12px; white-space: nowrap; }
+.vignettes { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+.vignette { padding: 0; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; background: var(--surface-2); cursor: pointer; text-align: left; }
+.vignette img { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; }
+.vignette span { display: block; padding: 5px 8px; font-size: 12px; color: var(--muted); overflow-wrap: anywhere; }
+.notes { margin-top: 22px; padding-top: 16px; border-top: 1px solid var(--border); }
+
+/* ─── markdown */
+.md { font-size: 14.5px; overflow-wrap: anywhere; }
+.md > :first-child { margin-top: 0; }
+.md h1, .md h2, .md h3, .md h4 { color: var(--text); text-transform: none; letter-spacing: -.01em; margin: 1.4em 0 .5em; }
+.md h1 { font-size: 22px; } .md h2 { font-size: 18px; } .md h3 { font-size: 15.5px; } .md h4 { font-size: 14.5px; }
+.md p { margin: .6em 0; }
+.md ul, .md ol { margin: .5em 0; padding-left: 1.4em; }
+.md li { margin: .25em 0; }
+.md li.coche { list-style: none; margin-left: -1.2em; }
+.md .case { display: inline-block; width: 1.2em; color: var(--muted); }
+.md li.coche.faite .case { color: var(--ok); }
+.md code { background: var(--surface-2); padding: 1px 5px; border-radius: 4px; }
+.md pre { background: var(--surface-2); padding: 12px 14px; border-radius: 8px; overflow: auto; font-size: 13px; }
+.md pre code { background: none; padding: 0; }
+.md blockquote { margin: .8em 0; padding: 2px 14px; border-left: 3px solid var(--border-fort); color: var(--muted); }
+.md table { border-collapse: collapse; margin: .8em 0; font-size: 13.5px; display: block; overflow-x: auto; }
+.md th, .md td { border: 1px solid var(--border); padding: 5px 9px; text-align: left; vertical-align: top; }
+.md th { background: var(--surface-2); }
+.md hr { border: 0; border-top: 1px solid var(--border); margin: 1.4em 0; }
+.lien-fichier { color: var(--accent); cursor: pointer; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 2px; }
+.json { font-family: var(--mono); font-size: 12.5px; white-space: pre-wrap; overflow-wrap: anywhere; margin: 0; }
+
+/* ─── visionneuse */
+.visionneuse { position: fixed; inset: 0; z-index: 20; display: flex; justify-content: flex-end; }
+.visionneuse[hidden] { display: none; }
+.voile { position: absolute; inset: 0; background: rgba(10, 9, 8, .45); }
+.panneau { position: relative; width: min(920px, 100%); height: 100%; background: var(--surface); display: flex; flex-direction: column;
+  box-shadow: -10px 0 40px rgba(0, 0, 0, .2); }
+.panneau-tete { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 14px 20px;
+  border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+.panneau-tete .v-titre { font-weight: 650; font-size: 16px; }
+.panneau-tete code { color: var(--muted); overflow-wrap: anywhere; }
+.panneau-tete .actions { display: flex; gap: 8px; }
+.v-corps { flex: 1; overflow: auto; padding: 20px 24px 40px; }
+.v-corps img { max-width: 100%; border-radius: 8px; display: block; margin: 0 auto; }
+
+.toast { position: fixed; left: 50%; bottom: 24px; transform: translate(-50%, 20px); opacity: 0; pointer-events: none;
+  background: var(--text); color: var(--bg); padding: 10px 16px; border-radius: 10px; font-size: 14px; font-weight: 550;
+  transition: opacity .18s, transform .18s; z-index: 30; max-width: calc(100% - 32px); }
+.toast.visible { opacity: 1; transform: translate(-50%, 0); }
+.bandeau { padding: 12px 16px; border-radius: 10px; background: var(--accent-doux); color: var(--text); margin-bottom: 20px; font-weight: 550; }
+.pied { margin-top: 40px; color: var(--faible); font-size: 12px; text-align: center; }
+
+@media (max-width: 520px) {
+  .page { padding: 18px 16px 48px; }
+  .barre-int { padding: 10px 16px; }
+  .marque .sous { display: none; }
+  .videos { grid-template-columns: 1fr; }
+  .v-corps { padding: 16px; }
+}
+</style>
+</head>
+<body>
+<header class="barre"><div class="barre-int" id="barre"></div></header>
+<main class="page" id="app"></main>
+
+<div id="visionneuse" class="visionneuse" hidden>
+  <div class="voile" data-fermer></div>
+  <aside class="panneau" role="dialog" aria-modal="true" aria-labelledby="v-titre">
+    <header class="panneau-tete">
+      <div><div class="v-titre" id="v-titre"></div><code id="v-chemin"></code></div>
+      <div class="actions">
+        <button class="bouton petit" id="v-ouvrir">Ouvrir dans l'appli</button>
+        <button class="bouton petit" id="v-copier">Copier le chemin</button>
+        <button class="bouton icone" data-fermer aria-label="Fermer">×</button>
+      </div>
+    </header>
+    <div class="v-corps" id="v-corps"></div>
+  </aside>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+"use strict";
+const JETON = document.querySelector('meta[name="jeton"]').content;
+const S = { etat: null, git: null, controles: null, fiche: null, erreur: null, chargeGit: false, chargeControles: false,
+            action: null, sortie: null, message: "", dernierFetch: 0, majA: null };
+const ICONE_COPIE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>';
+const LOGO = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M5 6h14M12 6v13"/></svg>';
+
+// ─── outils
+const h = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const enc = encodeURIComponent;
+
+async function api(chemin, corps) {
+  const opts = corps === undefined ? {} :
+    { method: "POST", body: JSON.stringify(corps), headers: { "Content-Type": "application/json", "X-Atelier": JETON } };
+  let r;
+  try { r = await fetch(chemin, opts); }
+  catch (e) { throw new Error("L'atelier ne répond plus (fenêtre fermée ?) : relance atelier.bat."); }
+  const data = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(data.erreur || `erreur ${r.status}`);
+  return data;
+}
+
+function jourUTC(iso) { const [a, m, j] = iso.slice(0, 10).split("-").map(Number); return Date.UTC(a, m - 1, j); }
+function ecartJours(iso) { return Math.round((jourUTC(iso) - jourUTC(S.etat ? S.etat.aujourdhui : new Date().toISOString())) / 864e5); }
+const relatif = new Intl.RelativeTimeFormat("fr", { numeric: "auto" });
+function jour(iso) { return new Date(jourUTC(iso)).toLocaleDateString("fr-FR", { day: "numeric", month: "short", timeZone: "UTC" }); }
+function depuis(iso) {
+  const s = (new Date(iso).getTime() - Date.now()) / 1000, a = Math.abs(s);
+  if (a < 60) return "à l'instant";
+  if (a < 3600) return relatif.format(Math.round(s / 60), "minute");
+  if (a < 86400) return relatif.format(Math.round(s / 3600), "hour");
+  if (a < 86400 * 30) return relatif.format(Math.round(s / 86400), "day");
+  return new Date(iso).toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" });
+}
+function taille(n) { return n < 1024 ? `${n} o` : n < 1048576 ? `${Math.round(n / 1024)} Ko` : `${(n / 1048576).toFixed(1)} Mo`; }
+function extension(nom) { const i = nom.lastIndexOf("."); return i < 0 ? "" : nom.slice(i + 1).toLowerCase(); }
+const estImage = nom => ["png", "jpg", "jpeg", "webp"].includes(extension(nom));
+
+function toast(texte) {
+  const t = document.getElementById("toast");
+  t.textContent = texte; t.classList.add("visible");
+  clearTimeout(toast.minuteur); toast.minuteur = setTimeout(() => t.classList.remove("visible"), 2600);
+}
+async function copier(texte, quoi) {
+  try { await navigator.clipboard.writeText(texte); }
+  catch (e) {
+    const zone = document.createElement("textarea"); zone.value = texte; document.body.appendChild(zone);
+    zone.select(); document.execCommand("copy"); zone.remove();
+  }
+  toast(quoi || `Copié : « ${texte} », colle-la dans Claude`);
+}
+
+// ─── chargements
+async function chargerEtat() {
+  try { S.etat = await api("/api/etat"); S.erreur = null; S.majA = new Date(); }
+  catch (e) { S.erreur = e.message; }
+  rendre();
+}
+async function chargerGit(fetch) {
+  S.chargeGit = true; rendre();
+  try { S.git = await api("/api/git?fetch=" + (fetch ? 1 : 0)); if (fetch) S.dernierFetch = Date.now(); }
+  catch (e) { S.git = { erreur: e.message }; }
+  S.chargeGit = false; rendre();
+}
+async function chargerControles() {
+  S.chargeControles = true; rendre();
+  try { S.controles = await api("/api/controles"); }
+  catch (e) { S.controles = { erreur: e.message, publications: null, rangement: [] }; }
+  S.chargeControles = false; rendre();
+}
+async function chargerFiche(id) {
+  try { S.fiche = await api("/api/video?id=" + enc(id)); }
+  catch (e) { S.fiche = { id, erreur: e.message }; }
+  rendre();
+}
+function toutActualiser() {
+  chargerEtat(); chargerGit(true); chargerControles();
+  const id = route().id; if (id) chargerFiche(id);
+}
+
+// ─── routes
+function route() { const m = location.hash.match(/^#\/v\/([a-z0-9-]+)/); return m ? { id: m[1] } : {}; }
+window.addEventListener("hashchange", () => {
+  const id = route().id;
+  if (id && (!S.fiche || S.fiche.id !== id)) { S.fiche = null; chargerFiche(id); }
+  rendre(); window.scrollTo(0, 0);
+});
+
+// ─── morceaux communs
+function phrase(p) {
+  return `<button class="phrase" data-copier="${h(p)}" title="Copier la phrase, puis la coller dans Claude">` +
+    `<span class="texte"><span class="guillemet">«</span> ${h(p)} <span class="guillemet">»</span></span>${ICONE_COPIE}</button>`;
+}
+function chargement(texte) { return `<div class="chargement"><span class="roue"></span>${h(texte)}</div>`; }
+function badge(statut) {
+  const cls = { "en cours": "en-cours", "programmée": "programmee", "publiée": "publiee", "terminée": "terminee" }[statut] || "pause";
+  return `<span class="badge badge-${cls}">${h(statut)}</span>`;
+}
+function quand(v) {
+  if (v.publiee) return `publiée le ${jour(v.publiee)} · ${relatif.format(ecartJours(v.publiee), "day")}`;
+  if (v.programmee) {
+    const d = new Date(v.programmee);
+    return `programmée ${d.toLocaleString("fr-FR", { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}`;
+  }
+  if (v.visee) {
+    const n = ecartJours(v.visee), retard = n < 0 && v.statut === "en cours";
+    return `<span class="${retard ? "en-retard" : ""}">visée le ${jour(v.visee)} · ${relatif.format(n, "day")}</span>`;
+  }
+  return "";
+}
+function segments(v) {
+  const cur = v.prochaine && v.prochaine.num;
+  return `<div class="segments" role="img" aria-label="${v.faites} étapes faites sur ${v.total}">` +
+    v.etapes.map(e => `<span class="seg ${e.fait ? "fait" : e.num === cur ? "courant" : ""}" title="${h(e.num + ". " + e.nom)}"></span>`).join("") + "</div>";
+}
+function attente(p) { return `${h(p.attente.quoi)} dû le ${jour(p.attente.date)} · ${relatif.format(ecartJours(p.attente.date), "day")}`; }
+function aFaire(v, grand) {
+  const p = v.prochaine;
+  if (!p) return "";
+  const quoi = `<span class="etape-num">${h(p.num)}</span> ${h(p.nom)}`;
+  if (p.attente) {
+    return `<div class="${grand ? "suite" : "prochaine"}"><div class="prochaine-quoi"><span class="etiquette">Ensuite</span>${quoi}</div>` +
+      `<span class="aide">${attente(p)}</span></div>`;
+  }
+  if (p.fichier) {
+    return `<div class="${grand ? "suite" : "prochaine"}"><div class="prochaine-quoi"><span class="etiquette">À toi</span>${quoi}</div>` +
+      `<button class="bouton" data-voir="videos/${h(v.id)}/${h(p.fichier)}">Voir ${h(p.fichier)}</button></div>`;
+  }
+  return `<div class="${grand ? "suite" : "prochaine"}"><div class="prochaine-quoi"><span class="etiquette">Ensuite</span>${quoi}</div>${phrase(p.phrase)}</div>`;
+}
+
+// ─── barre
+function vueBarre() {
+  const e = S.etat, g = S.git;
+  const pc = e ? `<strong>${h(e.pc)}</strong>${g && g.branche ? ` · ${h(g.branche)}` : ""}` : "";
+  const maj = S.majA ? `<br>actualisé à ${S.majA.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}` : "";
+  return `<a class="marque" href="#/"><span class="logo">${LOGO}</span><span><strong>Atelier</strong><span class="sous">@letsar555</span></span></a>` +
+    `<div class="pc">${pc}${maj}</div><button class="bouton" data-actualiser title="Relire suivi.md, demander à GitHub et à YouTube">↻ Actualiser</button>`;
+}
+
+// ─── accueil
+function blocAFaire() {
+  const e = S.etat;
+  const c = S.controles;
+  const pubs = (c && c.publications) || e.publications;
+  const items = e.bilans.map(a => ({ ...a, type: "bilan" })).concat(pubs.map(a => ({ ...a, type: "publication" })));
+  const liste = items.length
+    ? `<ul class="alertes">${items.map(a => `<li class="alerte alerte-${a.type}"><div class="alerte-corps">` +
+        (a.id ? `<a class="id" href="#/v/${h(a.id)}">${h(a.id)}</a>` : "") + `${h(a.texte)}</div>${a.phrase ? phrase(a.phrase) : ""}</li>`).join("")}</ul>`
+    : `<p class="vide">Rien d'urgent : aucun bilan dû, aucune publication oubliée.</p>`;
+  let rang = "";
+  if (S.chargeControles && !c) rang = `<div class="verif">${chargement("Vérification de la chaîne YouTube et du rangement…")}</div>`;
+  else if (c && c.erreur) rang = `<p class="aide verif">${h(c.erreur)}</p>`;
+  else if (c && c.rangement.length) {
+    rang = `<details class="rangement"><summary>Rangement : ${c.rangement.length} point${c.rangement.length > 1 ? "s" : ""} à regarder</summary>` +
+      `<ul>${c.rangement.map(l => `<li>${h(l)}</li>`).join("")}</ul>${phrase("range le dépôt d'après rangement.py")}</details>`;
+  }
+  return `<section class="bloc"><h2>À faire</h2>${liste}${rang}</section>`;
+}
+
+function carteVideo(v) {
+  return `<article class="carte video"><div><a class="video-titre" href="#/v/${h(v.id)}">${h(v.titre || v.id)}</a>` +
+    `<div class="meta"><code>${h(v.id)}</code>${badge(v.statut)}<span>${quand(v)}</span></div></div>` +
+    `<div>${segments(v)}<div class="segments-legende"><span>${v.faites} / ${v.total} étapes</span>` +
+    `<a href="#/v/${h(v.id)}" class="mono">fiche →</a></div></div>${aFaire(v, false)}</article>`;
+}
+function ligneVideo(v) {
+  const p = v.prochaine;
+  return `<div class="ligne"><div><a class="video-titre" href="#/v/${h(v.id)}">${h(v.titre || v.id)}</a>` +
+    `<div class="meta"><code>${h(v.id)}</code>${badge(v.statut)}<span>${quand(v)}</span></div></div>` +
+    `<div class="ligne-droite">${segments(v)}${p && p.phrase ? phrase(p.phrase) : p ? `<span class="aide">${p.attente ? attente(p) : h(p.num + ". " + p.nom)}</span>` : ""}</div></div>`;
+}
+function blocVideos() {
+  const vs = S.etat.videos;
+  const cle = v => v.programmee || v.visee || "9999";
+  const actives = vs.filter(v => v.statut === "en cours" || v.statut === "programmée").sort((a, b) => cle(a).localeCompare(cle(b)));
+  const publiees = vs.filter(v => v.statut === "publiée" || v.statut === "terminée").sort((a, b) => (b.publiee || "").localeCompare(a.publiee || ""));
+  const pause = vs.filter(v => !actives.includes(v) && !publiees.includes(v));
+  return `<section class="bloc"><h2>En cours <span class="compte">${actives.length}</span></h2>` +
+    (actives.length ? `<div class="videos">${actives.map(carteVideo).join("")}</div>`
+      : `<p class="vide">Aucune vidéo en cours. Pour en lancer une : ${phrase("nouvelle vidéo")}</p>`) + `</section>` +
+    (publiees.length ? `<section class="bloc"><h2>Publiées <span class="compte">${publiees.length}</span></h2><div class="liste">${publiees.map(ligneVideo).join("")}</div></section>` : "") +
+    (pause.length ? `<details class="bloc pause"><summary><h2>En pause ou abandonnées <span class="compte">${pause.length}</span></h2></summary>` +
+      `<div class="liste">${pause.map(ligneVideo).join("")}</div></details>` : "");
+}
+
+const CODES = { M: "modifié", A: "ajouté", D: "supprimé", R: "renommé", C: "copié", U: "en conflit", "??": "nouveau", AM: "ajouté", MM: "modifié" };
+function blocPC() {
+  const g = S.git;
+  let corps;
+  if (!g) corps = chargement("Vérification avec GitHub…");
+  else if (g.erreur) corps = `<p class="aide">${h(g.erreur)}</p>`;
+  else {
+    const occupe = !!S.action;
+    const lignes = g.lignes.length
+      ? `<ul class="pc-etat">${g.lignes.map(l => `<li>${h(l.replace(/ : lance (envoi|maj)\.bat.*$/, ""))}</li>`).join("")}</ul>`
+      : `<p class="a-jour">✓ À jour avec l'autre PC</p>`;
+    const commits = cs => `<ul class="commits">${cs.map(c => `<li><span>${h(c.message)}</span><span class="quand">${h(depuis(c.date))} · <span class="mono">${h(c.hash)}</span></span></li>`).join("")}</ul>`;
+    const recup = `<div class="pc-section"><h3>Envoyé par l'autre PC <span class="compte">${g.a_recuperer.length}</span></h3>` +
+      (g.a_recuperer.length ? commits(g.a_recuperer) : `<p class="aide">Rien à récupérer${S.chargeGit ? "…" : " (vérifié avec GitHub " + (S.dernierFetch ? depuis(new Date(S.dernierFetch).toISOString()) : "au chargement") + ")"}.</p>`) +
+      `<div class="rangee"><button class="bouton ${g.a_recuperer.length ? "principal" : ""}" data-agir="maj" ${occupe ? "disabled" : ""}>` +
+      `${S.action === "maj" ? '<span class="roue"></span> Récupération…' : "↓ Récupérer (maj)"}</button></div></div>`;
+    const rien = !g.modifies.length && !g.a_envoyer.length;
+    const ids = [...new Set(g.modifies.map(m => (m.chemin.match(/(?:^|\/)videos\/([a-z0-9-]+)\//) || [])[1]).filter(Boolean))];
+    const envoi = `<div class="pc-section"><h3>Pas encore envoyé depuis ce PC <span class="compte">${g.modifies.length + g.a_envoyer.length}</span></h3>` +
+      (rien ? `<p class="aide">Rien à envoyer.</p>` : "") +
+      (g.modifies.length ? `<ul class="modifs">${g.modifies.map(m => `<li><span class="code">${h(CODES[m.code] || CODES[m.code[0]] || m.code)}</span><span class="mono">${h(m.chemin)}</span></li>`).join("")}</ul>` : "") +
+      (g.a_envoyer.length ? `<p class="aide">Commits pas encore poussés :</p>${commits(g.a_envoyer)}` : "") +
+      `<input class="champ" id="message" maxlength="200" autocomplete="off" placeholder="Message (facultatif), ex. ${h(ids.length === 1 ? ids[0] : "mon-sujet-ia")} : tournage" value="${h(S.message)}">` +
+      `<div class="rangee"><button class="bouton ${rien ? "" : "principal"}" data-agir="envoi" ${occupe || rien ? "disabled" : ""}>` +
+      `${S.action === "envoi" ? '<span class="roue"></span> Envoi…' : "↑ Envoyer à l'autre PC"}</button></div>` +
+      `<p class="aide">Envoie tout ce qui a changé sur ce PC (envoi.py : refuse vidéos, gros fichiers et secrets, récupère d'abord le travail de l'autre PC).</p></div>`;
+    let sortie = "";
+    if (S.sortie) {
+      sortie = `<pre class="sortie ${S.sortie.ok ? "" : "echec"}">${h(S.sortie.sortie || (S.sortie.ok ? "ok" : "échec"))}</pre>` +
+        (!S.sortie.ok && S.sortie.quoi === "maj" ? `<p class="aide">Si des fichiers modifiés ici bloquent la récupération : « Envoyer » récupère aussi le travail de l'autre PC (il fusionne avant de pousser).</p>` : "");
+    }
+    const dernier = g.dernier ? `<div class="pied-pc">Dernier commit ici : ${h(g.dernier.message)} · ${h(depuis(g.dernier.date))}</div>` : "";
+    corps = lignes + recup + envoi + sortie + dernier;
+  }
+  return `<section class="carte pc-carte"><h2>Les deux PC ${S.chargeGit && g ? '<span class="roue" style="display:inline-block;vertical-align:-2px;margin-left:6px"></span>' : ""}</h2>${corps}</section>`;
+}
+
+function vueAccueil() {
+  if (!S.etat) return S.erreur ? `<div class="bandeau">${h(S.erreur)}</div>` : chargement("Lecture des suivi.md…");
+  return (S.erreur ? `<div class="bandeau">${h(S.erreur)}</div>` : "") +
+    `<div class="accueil"><div class="colonne">${blocAFaire()}${blocVideos()}</div><aside class="colonne colonne-pc">${blocPC()}</aside></div>` +
+    `<p class="pied">atelier.py lit repo.py et rangement.py : rien n'est recopié. Les étapes se lancent dans Claude avec la phrase copiée.</p>`;
+}
+
+// ─── fiche
+function liensDe(f) {
+  const m = new Map();
+  for (const g of f.groupes) for (const x of g.fichiers) { m.set(x.nom, x.chemin); m.set(x.chemin, x.chemin); }
+  for (const x of f.images) { m.set(x.nom, x.chemin); m.set(x.chemin, x.chemin); }
+  return m;
+}
+function vueFiche() {
+  const id = route().id, f = S.fiche;
+  const retour = `<a class="retour" href="#/">← Toutes les vidéos</a>`;
+  if (!f || f.id !== id) return retour + chargement("Lecture de la fiche…");
+  if (f.erreur) return retour + `<div class="bandeau">${h(f.erreur)}</div>`;
+  const liens = liensDe(f), cur = f.prochaine && f.prochaine.num;
+  const lien = /^https?:\/\//.test(f.champs.Lien || "") ? `<a href="${h(f.champs.Lien)}" target="_blank" rel="noopener">Voir sur YouTube ↗</a>` : "";
+  const tete = `<div class="fiche-tete"><div><h1>${h(f.titre || f.id)}</h1><div class="meta"><code>${h(f.id)}</code>${badge(f.statut)}` +
+    `<span>${quand(f)}</span>${f.champs.Tournage ? `<span>tournage : ${h(f.champs.Tournage)}</span>` : ""}${lien}</div></div>` +
+    `<div class="actions">${f.dossiers.map(d => `<button class="bouton" data-ouvrir="${h(d.chemin)}">📁 ${h(d.nom)}</button>`).join("")}</div></div>`;
+  const pas = f.etapes.map(e => {
+    const courant = e.num === cur;
+    return `<li class="pas ${e.fait ? "fait" : courant ? "courant" : ""}"><span class="pas-marque">${e.fait ? "✓" : ""}</span><div>` +
+      `<div class="pas-nom"><span class="etape-num">${h(e.num)}</span> ${h(e.nom)}${e.qui ? `<span class="qui">${h(e.qui)}</span>` : ""}</div>` +
+      (e.detail ? `<div class="pas-detail">${enLigne(e.detail, liens)}</div>` : "") +
+      (courant && f.prochaine.phrase ? phrase(f.prochaine.phrase) : "") +
+      (courant && f.prochaine.attente ? `<div class="aide">${attente(f.prochaine)}</div>` : "") +
+      (courant && f.prochaine.fichier ? `<button class="bouton petit" data-voir="videos/${h(f.id)}/${h(f.prochaine.fichier)}">Voir ${h(f.prochaine.fichier)}</button>` : "") +
+      `</div></li>`;
+  }).join("");
+  const etapesBloc = `<section class="carte"><h2>Étapes · ${f.faites} / ${f.total}</h2><ol class="pas-liste">${pas}</ol>` +
+    (f.notes ? `<div class="notes md">${markdown(f.notes, liens)}</div>` : "") + `</section>`;
+  const groupes = f.groupes.filter(g => g.fichiers.length).map(g => `<div class="groupe"><h3>${h(g.nom)}</h3><ul class="fichiers-liste">` +
+    g.fichiers.map(x => `<li><button class="fichier" data-voir="${h(x.chemin)}"><span class="ico">${h(extension(x.nom))}</span>` +
+      `<span class="nom">${h(x.nom)}</span><span class="info">${taille(x.taille)} · ${h(depuis(x.modifie))}</span></button></li>`).join("") + `</ul></div>`).join("");
+  const images = f.images.length ? `<div class="groupe"><h3>Images des miniatures</h3><div class="vignettes">` +
+    f.images.map(x => `<button class="vignette" data-voir="${h(x.chemin)}"><img src="/api/image?chemin=${enc(x.chemin)}" alt="" loading="lazy"><span>${h(x.nom)}</span></button>`).join("") +
+    `</div></div>` : "";
+  const fichiersBloc = `<section class="carte"><h2>Fichiers</h2>${groupes || '<p class="vide">Aucun fichier.</p>'}${images}</section>`;
+  return retour + tete + aFaire(f, true) + `<div class="fiche-grille">${etapesBloc}${fichiersBloc}</div>`;
+}
+
+// ─── markdown (ce qu'utilisent les fichiers du dépôt : titres, listes, cases, tableaux, citations, code)
+function enLigne(texte, liens) {
+  const codes = [];
+  let s = h(texte).replace(/`([^`]+)`/g, (_, c) => { codes.push(c); return `\u0000${codes.length - 1}\u0000`; });
+  s = s.replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>')
+    .replace(/(^|[\s(])(https?:\/\/[^\s<)]+)/g, '$1<a href="$2" target="_blank" rel="noopener">$2</a>')
+    .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+    .replace(/(^|[\s(«])\*([^*\s][^*]*)\*(?=[\s).,;:!?»]|$)/g, "$1<em>$2</em>")
+    .replace(/(^|[\s(«])_([^_\s][^_]*)_(?=[\s).,;:!?»]|$)/g, "$1<em>$2</em>");
+  return s.replace(/\u0000(\d+)\u0000/g, (_, n) => {
+    const c = codes[n], cible = liens && (liens.get(c) || liens.get(c.replace(/^videos\/[^/]+\//, "")));
+    return cible ? `<a class="lien-fichier" data-voir="${h(cible)}"><code>${c}</code></a>` : `<code>${c}</code>`;
+  });
+}
+function markdown(src, liens) {
+  const lignes = src.replace(/\r\n?/g, "\n").split("\n"), out = [];
+  let i = 0;
+  const special = l => /^(#{1,6}\s|```|>|\s*([-*+]|\d+[.)])\s|\|)/.test(l) || /^\s*(-{3,}|\*{3,}|_{3,})\s*$/.test(l);
+  while (i < lignes.length) {
+    const l = lignes[i];
+    if (!l.trim()) { i++; continue; }
+    if (l.startsWith("```")) {
+      const bloc = []; i++;
+      while (i < lignes.length && !lignes[i].startsWith("```")) bloc.push(lignes[i++]);
+      i++; out.push(`<pre><code>${h(bloc.join("\n"))}</code></pre>`); continue;
+    }
+    let m = l.match(/^(#{1,6})\s+(.*)$/);
+    if (m) { const n = Math.min(m[1].length + 1, 4); out.push(`<h${n}>${enLigne(m[2], liens)}</h${n}>`); i++; continue; }
+    if (/^\s*(-{3,}|\*{3,}|_{3,})\s*$/.test(l)) { out.push("<hr>"); i++; continue; }
+    if (l.startsWith(">")) {
+      const bloc = [];
+      while (i < lignes.length && lignes[i].startsWith(">")) bloc.push(lignes[i++].replace(/^>\s?/, ""));
+      out.push(`<blockquote>${markdown(bloc.join("\n"), liens)}</blockquote>`); continue;
+    }
+    if (l.trim().startsWith("|") && i + 1 < lignes.length && /^\s*\|?\s*:?-{2,}/.test(lignes[i + 1])) {
+      const cellules = x => x.trim().replace(/^\||\|$/g, "").split("|").map(c => c.trim());
+      const tete = cellules(l); i += 2;
+      const rangs = [];
+      while (i < lignes.length && lignes[i].trim().startsWith("|")) rangs.push(cellules(lignes[i++]));
+      out.push(`<table><thead><tr>${tete.map(c => `<th>${enLigne(c, liens)}</th>`).join("")}</tr></thead><tbody>` +
+        rangs.map(r => `<tr>${r.map(c => `<td>${enLigne(c, liens)}</td>`).join("")}</tr>`).join("") + `</tbody></table>`);
+      continue;
+    }
+    if (/^\s*([-*+]|\d+[.)])\s/.test(l)) {
+      const items = [];
+      while (i < lignes.length) {
+        const x = lignes[i], im = x.match(/^(\s*)([-*+]|\d+[.)])\s+(.*)$/);
+        if (im) { items.push({ niveau: Math.floor(im[1].replace(/\t/g, "    ").length / 2), ordonne: /\d/.test(im[2]), texte: im[3] }); i++; }
+        else if (x.trim() && /^\s{2,}/.test(x) && items.length) { items[items.length - 1].texte += " " + x.trim(); i++; }
+        else break;
+      }
+      out.push(liste(items, liens)); continue;
+    }
+    const para = [];
+    while (i < lignes.length && lignes[i].trim() && !special(lignes[i])) para.push(lignes[i++].trim());
+    if (!para.length) { para.push(l.trim()); i++; }
+    out.push(`<p>${enLigne(para.join(" "), liens)}</p>`);
+  }
+  return out.join("\n");
+}
+function liste(items, liens) {
+  let html = "", pile = [];
+  for (const it of items) {
+    while (pile.length && pile[pile.length - 1].niveau > it.niveau) html += `</li></${pile.pop().balise}>`;
+    const haut = pile[pile.length - 1];
+    if (!haut || haut.niveau < it.niveau) { const b = it.ordonne ? "ol" : "ul"; pile.push({ niveau: it.niveau, balise: b }); html += `<${b}>`; }
+    else html += "</li>";
+    const c = it.texte.match(/^\[([ xX])\]\s+(.*)$/);
+    html += c ? `<li class="coche ${c[1] === " " ? "" : "faite"}"><span class="case">${c[1] === " " ? "☐" : "☑"}</span>${enLigne(c[2], liens)}`
+      : `<li>${enLigne(it.texte, liens)}`;
+  }
+  while (pile.length) html += `</li></${pile.pop().balise}>`;
+  return html;
+}
+
+// ─── visionneuse
+let ouvert = null;
+async function voir(chemin) {
+  const v = document.getElementById("visionneuse"), corps = document.getElementById("v-corps");
+  ouvert = chemin;
+  document.getElementById("v-titre").textContent = chemin.split("/").pop();
+  document.getElementById("v-chemin").textContent = chemin;
+  v.hidden = false; document.body.style.overflow = "hidden";
+  document.querySelector("#visionneuse [data-fermer].icone").focus();
+  if (estImage(chemin)) { corps.innerHTML = `<img src="/api/image?chemin=${enc(chemin)}" alt="${h(chemin)}">`; return; }
+  corps.innerHTML = chargement("Lecture…");
+  try {
+    const f = await api("/api/fichier?chemin=" + enc(chemin));
+    if (ouvert !== chemin) return;
+    const liens = S.fiche && !S.fiche.erreur ? liensDe(S.fiche) : null;
+    let html;
+    if (extension(f.nom) === "md") html = `<div class="md">${markdown(f.texte, liens)}</div>`;
+    else if (extension(f.nom) === "json") {
+      let t = f.texte; try { t = JSON.stringify(JSON.parse(f.texte), null, 2); } catch (e) { /* tel quel */ }
+      html = `<pre class="json">${h(t)}</pre>`;
+    } else html = `<pre class="json">${h(f.texte)}</pre>`;
+    corps.innerHTML = (f.tronque ? `<div class="bandeau">Fichier long : seul le début est affiché. « Ouvrir dans l'appli » pour le reste.</div>` : "") + html;
+    corps.scrollTop = 0;
+  } catch (e) { corps.innerHTML = `<div class="bandeau">${h(e.message)}</div>`; }
+}
+function fermer() { document.getElementById("visionneuse").hidden = true; document.body.style.overflow = ""; ouvert = null; }
+async function ouvrir(chemin) {
+  try { const r = await api("/api/ouvrir", { chemin }); toast(r.ok ? "Ouvert dans l'appli" : r.sortie); }
+  catch (e) { toast(e.message); }
+}
+document.getElementById("v-ouvrir").addEventListener("click", () => ouvert && ouvrir(ouvert));
+document.getElementById("v-copier").addEventListener("click", () => ouvert && copier(ouvert, "Chemin copié"));
+
+// ─── actions
+async function agir(quoi) {
+  if (S.action) return;
+  S.action = quoi; S.sortie = null; rendre();
+  try {
+    const r = await api("/api/" + quoi, quoi === "envoi" ? { message: S.message } : {});
+    S.sortie = { ...r, quoi };
+    if (r.ok && quoi === "envoi") S.message = "";
+  } catch (e) { S.sortie = { quoi, ok: false, sortie: e.message }; }
+  S.action = null;
+  rendre();
+  toast(S.sortie.ok ? (quoi === "maj" ? "Récupéré" : "Envoyé à l'autre PC") : "Échec : voir le message");
+  chargerEtat(); chargerGit(false);
+  const id = route().id; if (id) chargerFiche(id);
+}
+
+// ─── rendu et événements
+function rendre() {
+  const actif = document.activeElement, idActif = actif && actif.id, pos = actif && actif.selectionStart;
+  document.getElementById("barre").innerHTML = vueBarre();
+  document.getElementById("app").innerHTML = route().id ? vueFiche() : vueAccueil();
+  if (idActif && idActif !== "v-ouvrir" && idActif !== "v-copier") {
+    const el = document.getElementById(idActif);
+    if (el && el !== document.activeElement) { el.focus(); if (pos != null && el.setSelectionRange) el.setSelectionRange(pos, pos); }
+  }
+}
+document.addEventListener("click", e => {
+  const t = e.target.closest("[data-copier],[data-voir],[data-ouvrir],[data-agir],[data-fermer],[data-actualiser]");
+  if (!t) return;
+  if (t.hasAttribute("data-copier")) copier(t.dataset.copier);
+  else if (t.hasAttribute("data-voir")) { e.preventDefault(); voir(t.dataset.voir); }
+  else if (t.hasAttribute("data-ouvrir")) ouvrir(t.dataset.ouvrir);
+  else if (t.hasAttribute("data-agir")) agir(t.dataset.agir);
+  else if (t.hasAttribute("data-fermer")) fermer();
+  else if (t.hasAttribute("data-actualiser")) toutActualiser();
+});
+document.addEventListener("input", e => { if (e.target.id === "message") S.message = e.target.value; });
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape" && !document.getElementById("visionneuse").hidden) fermer();
+  if (e.key === "Enter" && e.target.id === "message") { const b = document.querySelector('[data-agir="envoi"]'); if (b && !b.disabled) agir("envoi"); }
+});
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) return;
+  chargerEtat(); chargerGit(Date.now() - S.dernierFetch > 5 * 60e3);
+  const id = route().id; if (id) chargerFiche(id);
+});
+setInterval(() => { if (!document.hidden) chargerEtat(); }, 60e3);
+
+rendre();
+toutActualiser();
+</script>
+</body>
+</html>

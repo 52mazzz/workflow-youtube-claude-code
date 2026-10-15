@@ -1,0 +1,28 @@
+{
+ "_aide": "Motion design d'une vidéo, direction « duel lisible et nerveux » (2026-10-07, skill montage-capcut preferences.md). at/dur en secondes de la timeline dérushée, calés au mot près (phrases.py). type = compositions/<type>.html ; vars = variables du type (make_compositions.py SPECS) : verifie_plan.py refuse une variable inconnue ou une variable obligatoire absente (jamais de valeur d'exemple à l'écran). plans : plans de jeu posés au-dessus de la timeline (vitesse = accéléré, ex. 10 pour une génération). Couches automatiques (repères au-dessus des éléments, flashs devant). Ordre d'une vidéo : accroche (partage, titre_jeu, duel, minuteur, a_venir + plans rapides), puis par test : carte (plein 1 à 1,5 s puis dans le coin), pastille tenue tout le test (etat ok / rate), capture de la consigne (zones au fil de la voix), accelere + minuteur sur la génération (10 s au plus) avec Tsar qui réagit, fleche sur ce que fait le jeu (une chose qui ne bouge pas pendant la flèche), mot environ une fois par minute, insert, puis progression entre deux tests ; verdict : une note par IA. Positions : pastille en bas à gauche, carte réduite en haut à droite, minuteur en haut à gauche, accéléré en haut au centre, Tsar en bas à droite, mot en bas au centre. Exemple réel rendu : videos/_exemple-direction/ (glacon-ia). Les noms des IA viennent de videos/<id>/resultats.md.",
+ "plans": [
+  {"rush": "<rush du résultat de Claude>", "at": 10.0, "dur": 0.9, "src": 120.0},
+  {"rush": "<rush du résultat de ChatGPT>", "at": 10.9, "dur": 0.9, "src": 95.0},
+  {"rush": "<rush de la génération de Claude>", "at": 48.0, "dur": 6.0, "src": 30.0, "vitesse": 10}
+ ],
+ "elements": [
+  {"id": "a01-partage", "type": "partage", "at": 0.0, "dur": 3.0, "vars": {"A": ["<rush Claude>", 120.0], "B": ["<rush ChatGPT>", 95.0], "nomA": "CLAUDE", "nomB": "CHATGPT", "flou": "b"}},
+  {"id": "a02-titre", "type": "titre_jeu", "at": 3.0, "dur": 1.2, "vars": {"texte": "POKÉMON", "image": ""}},
+  {"id": "a03-duel", "type": "duel", "at": 4.2, "dur": 2.4, "vars": {"nomA": "CLAUDE", "logoA": "claude", "couleurA": "#E07A5A", "nomB": "CHATGPT", "logoB": "chatgpt", "couleurB": "#3CCFB0", "a": 0.0, "b": 0.6, "vs": 1.2}},
+  {"id": "a04-minuteur", "type": "minuteur", "at": 6.6, "dur": 3.0, "vars": {"de": 2700, "position": "centre"}},
+  {"id": "a05-a-venir", "type": "a_venir", "at": 10.0, "dur": 2.6, "vars": {"texte": "À VENIR"}},
+
+  {"id": "t1-01-carte-claude", "type": "carte", "at": 40.0, "dur": 30.0, "vars": {"texte": "CLAUDE", "fond": "#D97757", "logo": "claude", "plein": 1.2}},
+  {"id": "t1-02-pastille", "type": "pastille", "at": 41.3, "dur": 28.7, "vars": {"texte": "Le combat", "etat": [[25.0, "ok"]]}},
+  {"id": "t1-03-consigne", "type": "capture", "at": 42.0, "dur": 5.0, "vars": {"image": "videos/<id>/captures/consigne.png", "zones": [[0.6, 0.02, 0.05, 0.9, 0.12], [2.8, 0.02, 0.2, 0.7, 0.12]]}},
+  {"id": "t1-04-accelere", "type": "accelere", "at": 48.0, "dur": 6.0, "vars": {"texte": "×10"}},
+  {"id": "t1-05-minuteur", "type": "minuteur", "at": 48.0, "dur": 6.0, "vars": {"de": 0, "a": 540}},
+  {"id": "t1-06-tsar", "type": "reaction", "at": 51.0, "dur": 1.9, "vars": {"humeur": "rire"}},
+  {"id": "t1-07-fleche", "type": "fleche", "at": 58.0, "dur": 2.2, "vars": {"texte": "La capture", "x": 0.62, "y": 0.55, "cote": "gauche"}},
+  {"id": "t1-08-mot", "type": "mot", "at": 62.0, "dur": 1.2, "vars": {"texte": "ÉNORME"}},
+  {"id": "t1-09-progression", "type": "progression", "at": 70.0, "dur": 2.5, "vars": {"tests": [{"nom": "Le combat", "gagnant": "a"}, {"nom": "La carte", "gagnant": ""}], "actuel": 0, "a": 1.0, "nomA": "CLAUDE", "logoA": "claude", "couleurA": "#E07A5A", "nomB": "CHATGPT", "logoB": "chatgpt", "couleurB": "#3CCFB0"}},
+
+  {"id": "v01-note-claude", "type": "note", "at": 500.0, "dur": 4.0, "vars": {"nom": "CLAUDE", "logo": "claude", "couleur": "#E07A5A", "note": "8/10", "points": [["+", "Les combats"], ["-", "La carte est vide"]], "a": 0.6}},
+  {"id": "v02-note-chatgpt", "type": "note", "at": 504.0, "dur": 4.0, "vars": {"nom": "CHATGPT", "logo": "chatgpt", "couleur": "#3CCFB0", "note": "6/10", "points": [["+", "Les créatures"], ["-", "Les bugs"]], "a": 0.6}}
+ ]
+}
