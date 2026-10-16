@@ -95,9 +95,9 @@ def main(vid: str) -> None:
     liste = list(cfg["transitions"])
     if cfg.get("transitions_sauts", True):
         liste = sorted(liste + sauts(cfg, segs, [t for t, *_ in liste]))
-    for n, (t0, kind, why) in enumerate(liste, 1):
+    for n, (t0, kind, why, *exact) in enumerate(liste, 1):
         near = min(cs, key=lambda c: abs(c - t0))
-        cut = near if abs(near - t0) <= 0.8 else t0
+        cut = t0 if exact else near if abs(near - t0) <= 0.8 else t0  # 4e champ : temps exact (bord d'une frise)
         el = {"id": f"tr{n:02d}-transition", "type": kind, "at": round(cut - DUR[kind] * CUT_AT[kind], 3),
               "dur": DUR[kind], "coupe": round(cut, 3), "note": why}
         if kind.startswith("glisse"):

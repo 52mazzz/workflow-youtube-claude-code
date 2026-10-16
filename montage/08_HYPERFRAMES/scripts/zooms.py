@@ -16,10 +16,17 @@ Sortie : 06_CAPCUT/<id>/zooms.json (rendu.py ; option CapCut : capcut_bridge.py 
 """
 import json, sys
 from cadrage import LENT
-from commun import video, write_json
+from commun import draft, video, write_json
 from verifie_plan import plein_ecran, sous_plein_ecran
 
 ECART = 2.0
+
+
+def coupes_image(cfg) -> list:
+    """Débuts des plans de la piste principale (secondes de la timeline)."""
+    d = draft(cfg["projet"])
+    main = next(t for t in d["tracks"] if t["type"] == "video" and t.get("flag", 0) == 0)
+    return [s["target_timerange"]["start"] / 1e6 for s in main["segments"]]
 
 
 def choisir(punch, elements) -> list:
@@ -64,7 +71,26 @@ def main(vid: str) -> None:
     for at, dur, s, fx, fy, why in choisir(z.get("punch", []), elements):
         dx, dy = 2 * fx - 1, 1 - 2 * fy  # recentre la chose sans montrer les bords (décalage max = s - 1)
         punch.append({"at": at, "dur": dur, "scale": s, "x": round(max(-(s - 1), min(s - 1, -dx * s)), 3),
-                      "y": round(max(-(s - 1), min(s - 1, -dy * s)), 3), "note": why})
+                      "y": round(max(-(s - 1), min(s - 1, -dy * s)), 3), "note": why,
+                      "net": z.get("retour") == "net", **({"rampe": z["rampe"]} if "rampe" in z else {})})  # rampe : montée calée sur le son ; « retour net » (2026-10-16)
+    # « suivis » [[seconde, durée, échelle, [[t, fx, fy], …], pourquoi]] : zoom qui suit un objet qui bouge (le beurre
+    # déplacé dans l'inventaire, rick-morty-ia 2026-10-16) ; t en secondes de la timeline, cadrage interpolé entre les points
+    for at, dur, s, pts, why in z.get("suivis", []):
+        cl = lambda fx, fy: (round(max(-(s - 1), min(s - 1, -(2 * fx - 1) * s)), 3), round(max(-(s - 1), min(s - 1, -(1 - 2 * fy) * s)), 3))
+        chemin = [[t, *cl(fx, fy)] for t, fx, fy in pts]
+        # un zoom de cadrage vit dans un seul plan : le suivi est découpé aux coupes d'image qu'il traverse, la montée
+        # seulement au premier morceau, les suivants déjà pleins (la coupe cache le raccord)
+        bornes = [at] + [c for c in coupes_image(cfg) if at < c < at + dur] + [at + dur]
+        for k, (a_, b_) in enumerate(zip(bornes, bornes[1:])):
+            x0, y0 = cl(*[float(__import__("numpy").interp(a_, [p[0] for p in pts], [p[i] for p in pts])) for i in (1, 2)])
+            punch.append({"at": round(a_, 3), "dur": round(b_ - a_, 3), "scale": s, "x": x0, "y": y0, "note": why, "net": True,
+                          "rampe": (z.get("rampe", 0.17) if k == 0 else 1 / 60), "chemin": chemin})
+    # « avancees » [[seconde, durée, échelle, fx, fy, pourquoi]] : avancée lente vers un objet d'inventaire et son infobulle,
+    # sur toute la durée, puis sortie nette (référence LAirHisson, rick-morty-ia 2026-10-16)
+    for at, dur, s, fx, fy, why in z.get("avancees", []):
+        dx, dy = 2 * fx - 1, 1 - 2 * fy
+        punch.append({"at": at, "dur": dur, "scale": s, "x": round(max(-(s - 1), min(s - 1, -dx * s)), 3),
+                      "y": round(max(-(s - 1), min(s - 1, -dy * s)), 3), "note": why, "net": True, "lent": True})
     slow = {k: v for k, v in {**LENT, **z.get("slow", {})}.items() if k in LENT}
     if slow.get("mode") not in ("vague", "unique"):  # « unique » : une poussée par plan, sans retour à chaque phrase
         slow["remises"] = debuts_de_phrase(cfg)

@@ -33,6 +33,7 @@ C'est la seule liste qui fait foi : entre deux points d'arrêt, Claude enchaîne
 
 | Étape | Claude s'arrête pour | Sans réponse |
 |---|---|---|
+| 0 Départ | vidéo longue ou Short, et le domaine (avant la veille) | rien n'est lancé |
 | 1-2 Idée | le choix de l'idée et du format (phase 2), puis la validation du récapitulatif | rien n'est écrit |
 | 3-5 Accroches, script, titres | **une seule** validation, à la fin du run (accroches, script, titres et miniatures ensemble) | les fichiers restent en brouillon, non cochés |
 | 3b Préparation | les décisions matérielles qui te reviennent (outil, version, modèle) | la ligne reste à cocher dans `resultats.md` |

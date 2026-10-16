@@ -30,7 +30,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from cadrage import echelle, plan_zooms  # noqa: E402
-from commun import a_jour, draft, empreinte, h264, marquer, read_json, taille, video  # noqa: E402
+from commun import HF, a_jour, draft, empreinte, h264, marquer, read_json, taille, video  # noqa: E402
 
 FPS, W, H = 60, 1920, 1080  # W, H : remplacés par le format de la vidéo (Rendu.__init__)
 CARRE = False  # Short en carré sur fond flou (video.json "cadre_vertical": "carre_flou")
@@ -216,6 +216,11 @@ class Rendu:
         pc = read_json(self.out / "plan_capcut.json", {"items": []})
         comb = read_json(self.out / "plan_comblement.json", {"items": []})
         segs = segments_base(draft(cfg["projet"]), pc, comb, cfg.get("recadrage"), float(cfg.get("cx", 0.5)))
+        # la frise (plein écran entre deux objets) est un plan comme un autre : ses glissements d'entrée et de sortie font
+        # glisser le jeu et la frise elle-même, pas le jeu sous un écran posé d'un coup (rick-morty-ia, 2026-10-15)
+        frises = [i for i in pc["items"] if i.get("type") == "frise"]
+        segs += [{"file": str(self.out / i["file"]), "a": fr(i["at"]), "b": fr(i["at"] + i["dur"]), "src": 0.0, "speed": 1.0,
+                  "niveau": 200, "cx": 0.5, "scene": True} for i in frises]
         self.fin = max(s["b"] for s in segs if s["niveau"] == 0)
         pieces = [p for p in visibles(segs) if p["a"] < self.fin]
         pieces[-1]["b"] = min(pieces[-1]["b"], self.fin)
@@ -224,13 +229,18 @@ class Rendu:
         segz = [{"id": i, "start": p["a"] / FPS, "length": (p["b"] - p["a"]) / FPS, "path": p["file"], "level": 1, "src": p["src"]}
                 for i, p in enumerate(pieces) if p["file"]]
         z = plan_zooms(segz, zj.get("punch", []), zj.get("slow"))
+        fichiers_frise = {str(self.out / i["file"]) for i in frises}
         for i, p in enumerate(pieces):
-            p["points"], p["t0"] = (z.get(i) or {}).get("points", []), 0.0
+            p["points"], p["t0"] = ([] if p["file"] in fichiers_frise else (z.get(i) or {}).get("points", [])), 0.0
         self.glisses = [{"a": fr(i["at"]), "b": fr(i["at"] + i["dur"]), "sens": i["type"].split("_")[1]}
                         for i in pc["items"] if i.get("type", "").startswith("glisse_")]
         self.pieces = avec_glissements(pieces, self.glisses)
-        self.calques = sorted([i for i in pc["items"] if i["file"].startswith(("scenes/", "overlays/"))],
+        self.calques = sorted([i for i in pc["items"] if i["file"].startswith(("scenes/", "overlays/")) and i.get("type") != "frise"],
                               key=lambda i: (i.get("layer", 3), i["at"]))
+        # clips de mèmes incrustés au centre, par-dessus le jeu et sous les éléments du kit (rick-morty-ia, 2026-10-15)
+        self.incrustations = read_json(cfg["dir"] / "plan.json", {}).get("incrustations", [])
+        # clips de mèmes incrustés au centre, par-dessus le jeu et sous les éléments du kit (rick-morty-ia, 2026-10-15)
+        self.incrustations = read_json(cfg["dir"] / "plan.json", {}).get("incrustations", [])
         self.entree = cfg.get("entree", "eclaircissement")
 
     def graphe(self, a: int, b: int) -> Graphe:
@@ -258,6 +268,24 @@ class Rendu:
             noms.append(nom)
         g.filtres.append("".join(f"[{x}]" for x in noms) + f"concat=n={len(noms)}:v=1:a=0[base]")
         cur = "base"
+        for k, inc in enumerate(i for i in self.incrustations if fr(i["at"]) < b and fr(i["at"] + i["dur"]) > a):
+            debut, d = (fr(inc["at"]) - a) / FPS, float(inc["dur"])
+            avance = max(0.0, -debut)                      # incrustation commencée dans le morceau précédent
+            v_ = float(inc.get("vitesse", 1.0))            # >1 : clip accéléré (ex. 1,25 pour tenir dans un trou court)
+            idx = g.entree("-ss", f"{float(inc.get('src', 0)) + avance * v_:.4f}", "-t", f"{(d - avance) * v_ + 0.2:.4f}", "-i", str(HF / inc["fichier"]))
+            plein = bool(inc.get("plein"))                 # plein écran (carte de transition) : ni liseré ni fondu
+            larg, bord = (W, 0) if plein else (int(inc.get("largeur", 900)), 10)
+            c = inc.get("crop")                            # [x, y, w, h] en fractions : retirer des bords flous, un bandeau
+            cr = f"crop=iw*{c[2]}:ih*{c[3]}:iw*{c[0]}:ih*{c[1]}," if c else ""
+            fin_i = d - avance
+            fondu = "" if plein else (f"{'fade=t=in:st=0:d=0.12:alpha=1,' if avance == 0 else ''}"
+                                      f"fade=t=out:st={max(0.0, fin_i - 0.12):.3f}:d=0.12:alpha=1,")
+            taille_i = f"scale={W}:{H}" if plein else f"scale={larg}:-2,pad=iw+{2 * bord}:ih+{2 * bord}:{bord}:{bord}:white"
+            g.filtres.append(f"[{idx}:v]setpts=(PTS-STARTPTS)/{v_:.4f},fps={FPS},{cr}{taille_i},"
+                             f"format=rgba,{fondu}setpts=PTS+{max(0.0, debut):.4f}/TB[i{k}]")
+            g.filtres.append(f"[{cur}][i{k}]overlay=x=(W-w)/2:y=(H-h)/2-{0 if plein else int(inc.get('monte', 40))}:eof_action=pass:format=auto:"
+                             f"enable='between(t,{max(0.0, debut):.4f},{max(0.0, debut) + fin_i - 0.5 / FPS:.4f})'[vi{k}]")
+            cur = f"vi{k}"
         for k, it in enumerate(i for i in self.calques if fr(i["at"]) < b and fr(i["at"] + i["dur"]) > a):
             debut = (fr(it["at"]) - a) / FPS
             idx = g.entree("-ss", f"{max(0.0, -debut):.4f}", "-i", str(self.out / it["file"]))
@@ -287,7 +315,7 @@ class Rendu:
         if r.returncode:
             raise SystemExit(f"morceau {k} ({a / FPS:.2f}–{b / FPS:.2f} s) : échec FFmpeg\n{r.stderr[-3000:]}")
         n = int(subprocess.run(["ffprobe", "-v", "error", "-count_packets", "-select_streams", "v:0", "-show_entries",
-                                "stream=nb_read_packets", "-of", "csv=p=0", str(dst)], capture_output=True, text=True).stdout.strip() or 0)
+                                "stream=nb_read_packets", "-of", "csv=p=0", str(dst)], capture_output=True, text=True).stdout.strip().split(",")[0] or 0)
         if n != b - a:
             raise SystemExit(f"morceau {k} : {n} images au lieu de {b - a}")
         marquer(dst, emp)

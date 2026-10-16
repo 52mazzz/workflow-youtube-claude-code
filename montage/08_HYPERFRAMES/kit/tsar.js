@@ -322,7 +322,9 @@
     const words = typeof v.mots === "string" ? JSON.parse(v.mots) : v.mots || [{ text: "Sous-titre", t: 0 }];
     // style "reference" (Short de LAirHisson, 2026-10-13) : Montserrat 900 blanc sans contour, halo sombre flou autour
     // des lettres ; le groupe surgit à 60 % et rebondit à sa taille (back.out) en 9 images, puis disparaît net
-    const ref = v.style === "reference";
+    // VERROUILLÉ (2026-10-16, demande de l'utilisateur) : le style « reference » de sukuna-ia-short1 est celui de la chaîne,
+    // pour toutes les vidéos et tous les Shorts ; l'ancien style contouré ne sort plus que si on le demande ("style": "contour")
+    const ref = v.style !== "contour";
     const size = +v.taille || 76, stroke = ref ? 0 : Math.round(size * 0.16);
     const layer = h("div", "layer", { justifyContent: "center", alignItems: "flex-end", paddingBottom: (+v.bas || 110) + "px" });
     const box = h("div", "cap", { maxWidth: (+v.largeur || 1500) + "px", columnGap: size * 0.29 + "px", rowGap: "4px", fontSize: size + "px",
@@ -526,8 +528,13 @@
     const bg = wave(stage, v.fond || COLORS.accent);
     const lines = typeof v.lignes === "string" ? JSON.parse(v.lignes) : v.lignes || [];
     const marks = typeof v.surligne === "string" ? JSON.parse(v.surligne) : v.surligne || [];
-    const mark = (s) => marks.reduce((acc, m) => acc.split(escapeHtml(m)).join(
-      `<span style="background:rgba(229,56,59,.28);color:#fff;border-radius:6px;padding:0 6px">${escapeHtml(m)}</span>`), escapeHtml(s));
+    // un mot simple = surligné d'emblée ; {texte, t} = vrai trait de surligneur jaune tracé de gauche à droite à t (rick-morty-ia)
+    const mark = (s) => marks.reduce((acc, m, i) => {
+      const w = escapeHtml(typeof m === "string" ? m : m.texte);
+      return acc.split(w).join(typeof m === "string"
+        ? `<span style="background:rgba(229,56,59,.28);color:#fff;border-radius:6px;padding:0 6px">${w}</span>`
+        : `<span data-trait="${i}" style="position:relative;display:inline-block;padding:0 6px;font-weight:800"><span class="trait" style="position:absolute;left:-2px;right:-2px;top:12%;bottom:6%;background:linear-gradient(100deg,rgba(255,214,10,.95),rgba(255,200,0,.88));border-radius:4px 10px 6px 12px;transform:scaleX(0) skewX(-6deg);transform-origin:left center;z-index:0"></span><span class="mot" style="position:relative;z-index:1">${w}</span></span>`);
+    }, escapeHtml(s));
     const layer = h("div", "layer", { justifyContent: "center", alignItems: "center", flexDirection: "column" });
     const page = h("div", null, { width: "1420px", display: "flex", flexDirection: "column", gap: "22px" });
     const title = h("div", "big", { fontSize: "50px", lineHeight: 1.15, letterSpacing: "-0.5px" }, escapeHtml(v.titre || "Titre de la vidéo"));
@@ -550,10 +557,19 @@
     box.appendChild(tag);
     layer.appendChild(page); stage.appendChild(layer);
     const tagAt = +v.etiquetteA || 0.6;
+    const traits = [...box.querySelectorAll("[data-trait]")].map((el) => {
+      const m = marks[+el.dataset.trait];
+      return { bar: el.querySelector(".trait"), mot: el.querySelector(".mot"), at: +m.t || 0, d: +m.d || 0.4 };
+    });
     return (t) => {
       bg(t); openStyle(page, t, 0);
       const bp = progress(t, f(10), f(20)); box.style.opacity = bp; box.style.transform = `translateY(${(1 - bp) * 30}px)`;
       ups.forEach((u) => u(t));
+      traits.forEach(({ bar, mot, at, d }) => {
+        const q = progress(t, at, d, EASE.inOut);
+        bar.style.transform = `scaleX(${q}) skewX(-6deg)`;
+        mot.style.color = q > 0.55 ? "#141414" : "";
+      });
       const tp = progress(t, tagAt, f(26), EASE.pop), bob = Math.sin(Math.max(0, t - tagAt) * 5) * 6 * progress(t, tagAt + 0.4, f(10));
       tag.style.opacity = progress(t, tagAt, f(8));
       tag.style.transform = `translateY(${bob}px) scale(${0.85 + 0.15 * tp})`;
@@ -800,6 +816,92 @@
         slot.style.transform = `scale(${won ? 1 + 0.08 * (1 - progress(t, at, f(16))) : 1})`;
       }
       stage.style.opacity = progress(t, 0, f(5)) * (1 - progress(t, D - f(5), f(5), EASE.in));
+    };
+  };
+
+  /** Frise des objets testés, entre deux objets (rick-morty-ia) : une case par objet, « OBJET n » au-dessus et son nom en
+   *  dessous ; la caméra glisse de l'objet fini au suivant, dont le nom apparaît à l'arrivée ; les objets à venir gardent
+   *  leur nom flouté. Style Minecraft (retour du 2026-10-16, sa référence : carte « Règle n°5 » de LAirHisson) : fond noir,
+   *  police pixel Monocraft, « OBJET n » en jaune et nom en blanc avec l'ombre portée du jeu, cases façon emplacement
+   *  d'inventaire ; **aucune notion de réussite ou d'échec** (ni coche, ni vert, ni rouge). L'écran entre et sort par un
+   *  glissement vers la gauche (`glisse_gauche`, 0,5 s : la frise est complète dès la première image).
+   *  vars : objets = [{nom}], actuel (index de l'objet qui arrive, 0 = premier), a (s : départ du glissement de la caméra) */
+  B.frise = ({ stage, v, D }) => {
+    const objets = list(v.objets), n = objets.length, cur = Math.max(0, Math.min(+v.actuel || 0, n - 1));
+    const at = num(v.a, 0.7), PAN = 1.0, SP = 820, Y = SH / 2;
+    // couleurs de la chaîne (retour du 2026-10-16 : « garder les couleurs de la chaîne, pas le jaune ») ; ombre du jeu = ¼ de la couleur
+    const JAUNE = v.couleur || COLORS.accent, OMBRE_J = "#3A0E0F", BLANC = "#FFFFFF", OMBRE_B = "#3F3F3F", MC = "'Monocraft', monospace";
+    const fondFrise = v.style_fond || "vagues";                                // vagues (fond de la chaîne) | pierre | grille
+    let bg = null;
+    if (fondFrise === "vagues") bg = wave(stage, v.fond || COLORS.accent);
+    else if (fondFrise === "pierre") {                                         // blocs de pierre sombre teintés de rouge, pixel
+      const R = rng(41), cv = document.createElement("canvas"), B = 64;
+      cv.width = SW; cv.height = SH; Object.assign(cv.style, { position: "absolute", inset: "0", imageRendering: "pixelated" });
+      const g = cv.getContext("2d");
+      for (let y = 0; y < SH; y += B / 4) for (let x = 0; x < SW; x += B / 4) {
+        const l = 22 + Math.floor(R() * 5) * 6 + ((x / B | 0) + (y / B | 0)) % 2 * 5;
+        g.fillStyle = `rgb(${l + 8},${l - 2},${l - 2})`; g.fillRect(x, y, B / 4, B / 4);
+      }
+      g.fillStyle = "rgba(0,0,0,.35)";
+      for (let y = 0; y < SH; y += B) g.fillRect(0, y, SW, 3);
+      for (let x = 0; x < SW; x += B) g.fillRect(x, 0, 3, SH);
+      stage.appendChild(cv);
+      stage.appendChild(h("div", null, { position: "absolute", inset: "0", background: "radial-gradient(ellipse at center, rgba(229,56,59,.22), rgba(0,0,0,.55) 80%)" }));
+    } else {                                                                   // grille pixel rouge sur noir
+      stage.style.background = "#050505";
+      stage.appendChild(h("div", null, { position: "absolute", inset: "0", opacity: ".8",
+        backgroundImage: `linear-gradient(${COLORS.accent}55 3px, transparent 3px), linear-gradient(90deg, ${COLORS.accent}55 3px, transparent 3px)`,
+        backgroundSize: "48px 48px" }));
+      stage.appendChild(h("div", null, { position: "absolute", inset: "0", background: "radial-gradient(ellipse at center, rgba(229,56,59,.22), rgba(0,0,0,.85) 70%)" }));
+    }
+    const track = h("div", null, { position: "absolute", left: "0", top: "0", width: "100%", height: "100%" });
+    const x0 = (i) => i * SP;
+    const ligne = h("div", null, { position: "absolute", left: "0", top: Y - 8 + "px", width: x0(n - 1) + "px", height: "16px",
+      background: "repeating-linear-gradient(90deg,#555555 0 32px,#000000 32px 40px)" });
+    const rempli = h("div", null, { position: "absolute", left: "0", top: Y - 8 + "px", height: "16px",
+      background: `repeating-linear-gradient(90deg,${JAUNE} 0 32px,#000000 32px 40px)` });
+    track.append(ligne, rempli);
+    const texte = (txt, taille, coul, ombre) => h("div", null, { fontFamily: MC, fontWeight: 700, fontSize: taille + "px", color: coul,
+      textShadow: `${taille / 10}px ${taille / 10}px 0 ${ombre}`, whiteSpace: "nowrap", lineHeight: 1 }, escapeHtml(txt));
+    const pts = objets.map((o, i) => {
+      const slot = h("div", null, { position: "absolute", left: x0(i) - 52 + "px", top: Y - 52 + "px", width: "104px", height: "104px",
+        boxSizing: "border-box", background: "#8B8B8B", borderTop: "8px solid #373737", borderLeft: "8px solid #373737",
+        borderBottom: "8px solid #FFFFFF", borderRight: "8px solid #FFFFFF", transformOrigin: "50% 50%" });
+      if (o.icone) {                                                           // icône de l'objet dans la case (retour du 2026-10-16)
+        const ic = h("img", null, { position: "absolute", left: "4px", top: "4px", width: "80px", height: "80px", objectFit: "cover",
+          imageRendering: /\/textures\/|icones\/\d+_(portails|passe|golf|rayon|graines|tele|cronenberg|sauce|ornichon|larbin|vaisseau|bombe|cromulon)/.test(o.icone) ? "pixelated" : "auto" });
+        ic.src = o.icone; slot.appendChild(ic);
+      }
+      const cadre = h("div", null, { position: "absolute", left: x0(i) - 66 + "px", top: Y - 66 + "px", width: "132px", height: "132px",
+        boxSizing: "border-box", border: `8px solid ${BLANC}`, opacity: 0 });
+      const haut = h("div", null, { position: "absolute", left: x0(i) - 300 + "px", width: "600px", top: Y - 170 + "px", display: "flex",
+        justifyContent: "center" }, texte(`OBJET ${i + 1}`, 60, JAUNE, OMBRE_J));
+      const nom = h("div", null, { position: "absolute", left: x0(i) - 390 + "px", width: "780px", top: Y + 92 + "px", display: "flex",
+        justifyContent: "center", transformOrigin: "50% 0" }, texte(o.nom || "", 46, BLANC, OMBRE_B));
+      track.append(slot, cadre, haut, nom);
+      return { slot, cadre, haut, nom };
+    });
+    stage.append(track);
+    const camX = (k) => SW / 2 - k * SP;
+    return (t) => {
+      if (bg) bg(t);
+      const pan = progress(t, at, PAN, EASE.inOut);
+      const k = cur === 0 ? -0.6 + 0.6 * pan : cur - 1 + pan;
+      const s = (1 - 0.07 * Math.sin(Math.PI * pan)) * (1 + 0.025 * progress(t, 0, D, EASE.inOut));
+      track.style.transformOrigin = "0 0";
+      track.style.transform = `translate(${SW / 2}px, ${Y}px) scale(${s}) translate(${-SW / 2 + camX(k)}px, ${-Y}px)`;
+      rempli.style.width = Math.max(0, Math.min(x0(n - 1), k * SP)) + "px";
+      const arrive = at + PAN * 0.85;
+      pts.forEach(({ slot, cadre, haut, nom }, i) => {
+        const vu = i <= cur, la = i === cur && t >= arrive;
+        const r = i === cur ? progress(t, arrive, f(16), EASE.pop) : 0;
+        cadre.style.opacity = la ? 1 : 0;                                      // case sélectionnée, comme la barre d'objets
+        slot.style.transform = `scale(${i === cur ? 1 + 0.18 * (t >= arrive ? 1 - progress(t, arrive, f(20)) : 0) : 1})`;
+        haut.style.opacity = vu ? 1 : 0.4;
+        if (i < cur) { nom.style.filter = "none"; nom.style.opacity = 1; nom.style.transform = "none"; }
+        else if (i === cur) { nom.style.filter = `blur(${12 * (1 - r)}px)`; nom.style.opacity = 0.4 + 0.6 * r; nom.style.transform = `scale(${0.85 + 0.15 * r})`; }
+        else { nom.style.filter = "blur(12px)"; nom.style.opacity = 0.4; }
+      });
     };
   };
 

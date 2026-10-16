@@ -50,6 +50,9 @@ SPECS = {
     "progression": (2.5, False, [J("tests", [{"nom": "Le combat", "gagnant": "a"}, {"nom": "La carte", "gagnant": "b"}, {"nom": "Les bugs", "gagnant": ""}]),
                                  N("actuel", 1), N("a", 1.0), S("nomA", "CLAUDE"), C("couleurA", "#E07A5A"), S("logoA", "claude"),
                                  S("nomB", "CHATGPT"), C("couleurB", "#3CCFB0"), S("logoB", "chatgpt")]),
+    # frise des objets entre deux tests, caméra qui glisse (rick-morty-ia, 2026-10-15)
+    "frise": (2.4, False, [J("objets", [{"nom": "Pistolet à portails"}, {"nom": "Le vaisseau"}, {"nom": "Cornichon Rick"}]),
+                           N("actuel", 1), N("a", 0.7), C("couleur", "#E5383B"), C("fond", "#E5383B"), S("style_fond", "vagues")]),
     "capture": (3.0, True, [S("image", "assets/logos/claude.svg"), J("zone", [0.3, 0.45, 0.4, 0.1]), J("zones", []), N("a", 0.6), N("largeur", 1300)]),
     "insert": (0.8, False, [S("image", "assets/logos/claude.svg"), C("fond", "#0C0E12")]),
     "vignette": (1.5, True, [S("image", "assets/logos/claude.svg"), N("largeur", 520), N("hauteur", 520), N("x", 0.5), N("y", 0.5),

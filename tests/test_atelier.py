@@ -126,6 +126,59 @@ class FicheTest(unittest.TestCase):
             for bad in ("inconnu-ia", "../secrets", ""):
                 self.assertIsNone(atelier.fiche(r, bad))
 
+    def test_prompts(self):
+        with TempDir() as r:
+            d = video(r)
+            (d / "miniatures" / "refs").mkdir(parents=True)
+            (d / "miniatures" / "refs" / "rick.png").write_bytes(b"\x89PNG")
+            (d / "titres-miniatures.md").write_text(
+                "## 3. Ancien\n\n**vieux** : x\n\n```text\nold\n```\n\n## 5. Finales\n\nIntro.\n\n"
+                "**1-duo** : joindre `rick.png` (image 1) et `absent.png` (2).\n\n```text\nprompt un\n```\n\n"
+                "**2-ia** : rien.\n\n```text\nprompt deux\n```\n", encoding="utf-8")
+            p = atelier.fiche(r, "mon-sujet-ia")["prompts"]                                 # seulement la dernière section
+            self.assertEqual([(x["titre"], x["prompt"]) for x in p], [("1-duo", "prompt un"), ("2-ia", "prompt deux")])
+            self.assertEqual([(j["role"], j["chemin"]) for j in p[0]["joindre"]],
+                             [("image 1", "videos/mon-sujet-ia/miniatures/refs/rick.png"), ("image 2", None)])
+            self.assertEqual(p[1]["joindre"], [])
+
+    def test_fichiers_etape(self):
+        with TempDir() as r:
+            d = video(r)
+            (d / "idees.md").write_text("x", encoding="utf-8")
+            (r / "config" / "youtube").mkdir(parents=True)
+            (r / "config" / "youtube" / "apprentissages.md").write_text("x", encoding="utf-8")
+            et = {e["num"]: e["fichiers"] for e in atelier.fiche(r, "mon-sujet-ia")["etapes"]}
+            self.assertEqual([(x["nom"], x["existe"], x["editable"]) for x in et["1"]],
+                             [("idees.md", True, True), ("refs.json", False, False)])   # un .json ne se crée pas ici
+            self.assertEqual(et["5"][0], {"nom": "script.md", "chemin": "videos/mon-sujet-ia/script.md",
+                                          "existe": False, "editable": True})             # pas encore écrit : à commencer
+            self.assertEqual([(x["chemin"], x["editable"]) for x in et["11"]],
+                             [("config/youtube/apprentissages.md", False)])               # lu, pas modifié ici
+
+    def test_ecrire(self):
+        with TempDir() as r:
+            d = video(r)
+            (d / "script.md").write_bytes(b"ligne 1\r\nligne 2\r\n")
+            v = atelier.lire(r, "videos/mon-sujet-ia/script.md")
+            self.assertTrue(v["editable"])
+            res = atelier.ecrire(r, "videos/mon-sujet-ia/script.md", "nouveau\ntexte\n", v["version"])
+            self.assertTrue(res["ok"], res)
+            self.assertEqual((d / "script.md").read_bytes(), b"nouveau\r\ntexte\r\n")          # fins de ligne gardées
+            conflit = atelier.ecrire(r, "videos/mon-sujet-ia/script.md", "vieux", v["version"])
+            self.assertTrue(conflit.get("conflit"))                                            # Claude a écrit entre-temps
+            self.assertEqual((d / "script.md").read_bytes(), b"nouveau\r\ntexte\r\n")
+            self.assertTrue(atelier.ecrire(r, "videos/mon-sujet-ia/shorts.md", "# Shorts\n", "")["ok"])   # créé
+            (d / "refs.json").write_text("{}", encoding="utf-8")
+            vj = atelier.lire(r, "videos/mon-sujet-ia/refs.json")["version"]
+            self.assertFalse(atelier.ecrire(r, "videos/mon-sujet-ia/refs.json", "{pas du json", vj)["ok"])
+            (r / "config").mkdir()
+            (r / "config" / "x.md").write_text("x", encoding="utf-8")
+            for bad in ("config/x.md", "../x.md", "videos/x.md", "videos/mon-sujet-ia/a/b.md", "videos/autre-ia/n.md",
+                        "videos/mon-sujet-ia/n.py", "/videos/mon-sujet-ia/s.md", "C:/x.md", None):
+                self.assertFalse(atelier.ecrire(r, bad, "x", "")["ok"], bad)
+            self.assertFalse(atelier.lire(r, "config/x.md")["editable"])
+            self.assertFalse(any(p.name.endswith(".atelier-tmp") for p in d.iterdir()))
+
     def test_chemin_sur(self):
         with TempDir() as r:
             video(r)
@@ -168,6 +221,12 @@ class ServeurTest(unittest.TestCase):
                 code, _, body = s.post("/api/maj", {})                                        # pas le dépôt de l'atelier
                 self.assertFalse(json.loads(body)["ok"])
                 self.assertEqual(s.post("/api/inconnu", {})[0], 404)
+                v = json.loads(s.get("/api/fichier?chemin=videos/mon-sujet-ia/script.md")[2])["version"]
+                self.assertEqual(s.post("/api/ecrire", {"chemin": "videos/mon-sujet-ia/script.md", "texte": "x", "version": v},
+                                        jeton=None)[0], 403)                                  # autre site : rien d'écrit
+                code, _, body = s.post("/api/ecrire", {"chemin": "videos/mon-sujet-ia/script.md", "texte": "# Réécrit\n", "version": v})
+                self.assertTrue(json.loads(body)["ok"])
+                self.assertEqual((d / "script.md").read_text(encoding="utf-8"), "# Réécrit\n")
 
     def test_two_pcs(self):
         with TempDir() as t:

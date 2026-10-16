@@ -16,7 +16,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from commun import ANALYSE, HF, read_json, remap, video  # noqa: E402
 
 FIXE, VIDE = 2.0, 6.0
-SCENES = {"partage", "progression", "insert", "scene_fenetre", "scene_vs", "scene_vainqueur", "scene_outro",
+SCENES = {"partage", "progression", "frise", "insert", "scene_fenetre", "scene_vs", "scene_vainqueur", "scene_outro",
           "scene_fond", "scene_mots", "scene_description", "barres"}
 DISCRETS = {"pastille", "soustitre", "etiquette"}  # toujours là ou trop discrets : ne meublent pas l'écran
 

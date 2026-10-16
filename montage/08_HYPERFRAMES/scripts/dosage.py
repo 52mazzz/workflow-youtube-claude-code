@@ -35,7 +35,7 @@ CIBLE = {
     "coupures": (0.0, 0.0),    # blancs d'au moins 1 s entre deux morceaux : aucun (retour du 2026-10-13, gojo-ia : « ça fait bizarre »)
     "pauses": (0, 3),          # pauses de voix de 0,3 s et plus (14,1 ; 6,8 ; 2,7)
 }
-GRANDS = ("carte", "capture", "insert", "progression", "score", "partage", "duel", "titre_jeu", "note")
+GRANDS = ("carte", "capture", "insert", "progression", "frise", "score", "partage", "duel", "titre_jeu", "note")
 
 
 def regrouper(ts, ecart=0.4):

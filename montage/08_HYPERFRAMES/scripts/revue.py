@@ -72,7 +72,8 @@ def sons(r: Rendu) -> list:
         t = it.get("type", "")
         if not t or t in SANS_SON or t.startswith("glisse") or it.get("layer") == 1:
             continue
-        if not any(it["at"] - 0.15 <= x <= it["at"] + 0.45 for x in sfx):  # même écart que l'arbitre d'audio.py
+        avant = 0.3 if t == "frise" else 0.15  # frise : le succès Minecraft part 0,25 s avant, avec le glissement (2026-10-15)
+        if not any(it["at"] - avant <= x <= it["at"] + 0.45 for x in sfx):  # même écart que l'arbitre d'audio.py
             pb.append(f"bruitage : {it.get('id', it['file'])} ({t}) entre à {mm(it['at'])} sans aucun son")
     for k, x in enumerate(sfx):
         n = sum(1 for y in sfx[k:] if y < x + 1.0)

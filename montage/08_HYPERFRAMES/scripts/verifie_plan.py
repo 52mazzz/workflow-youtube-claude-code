@@ -30,7 +30,7 @@ FLASHS = {"flash", "obturateur"}
 # variables à donner explicitement (sinon : valeur d'exemple du kit à l'écran)
 REQUIS = {
     "partage": ["A", "B", "nomA", "nomB"], "carte": ["texte", "plein"], "pastille": ["texte"],
-    "progression": ["tests", "actuel", "nomA", "nomB", "logoA", "logoB"], "capture": ["image"], "insert": ["image"],
+    "progression": ["tests", "actuel", "nomA", "nomB", "logoA", "logoB"], "frise": ["objets", "actuel"], "capture": ["image"], "insert": ["image"],
     "duel": ["nomA", "nomB", "logoA", "logoB"], "minuteur": ["de"], "accelere": ["texte"], "note": ["nom", "logo", "note", "points"],
     "fleche": ["texte", "x", "y"], "mot": ["texte"], "score": ["avantA", "avantB", "point", "nomA", "nomB"], "reaction": ["humeur"],
     "etiquette": ["texte"], "scene_mots": ["items"], "annotation": ["texte"], "point": ["texte"], "scene_fenetre": ["titre", "lignes"],

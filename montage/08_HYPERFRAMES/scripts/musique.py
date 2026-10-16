@@ -522,7 +522,8 @@ __CARTES__</main><div id="bilan"></div><script>
 const maj=()=>{const c=[...document.querySelectorAll('.carte[data-k]')].filter(x=>x.querySelector('.choix input'));const n=v=>c.filter(x=>x.querySelector('input[value='+v+']:checked')).length;
 document.getElementById('bilan').textContent=`${n('garder')} gardées · ${n('refuser')} refusées · ${n('hesite')} hésitations · ${c.length-n('garder')-n('refuser')-n('hesite')} pas encore écoutées`;};
 document.addEventListener('change',maj);maj();
-document.querySelectorAll('button.saut').forEach(b=>b.onclick=()=>{const a=b.closest('.carte').querySelector('audio');a.currentTime=+b.dataset.t;a.play();});
+document.querySelectorAll('button.saut').forEach(b=>b.onclick=()=>{const a=b.closest('.carte').querySelector('audio');
+a.currentTime=b.dataset.d!==undefined?Math.max(0,a.currentTime+ +b.dataset.d):+b.dataset.t;a.play();});
 window.verdicts=()=>[...document.querySelectorAll('.carte[data-k]')].map(c=>({k:c.dataset.k,avis:(c.querySelector('.choix input:checked')||{}).value||null,
 moments:[...c.querySelectorAll('.moments input:checked')].map(i=>i.value),raison:(c.querySelector('input[type=text]')||{}).value||''}));
 </script></body></html>"""
@@ -539,6 +540,8 @@ def cmd_ecoute(a):
     def carte(k, t, avis=True):
         me, rel = t.get("mesure", {}), quote(Path(k).name) if k.startswith("a_ecouter/") else "../" + quote(k)
         sauts = " ".join(f'<button class="saut" data-t="{d}">passage fort {d // 60}:{d % 60:02d}</button>' for d in me.get("departs", [])[:2])
+        # avancer ou reculer dans le morceau (demande du 2026-10-16) ; la barre du lecteur marche aussi (serveur_ecoute.py)
+        sauts += "".join(f' <button class="saut" data-d="{d}">{"+" if d > 0 else "−"}{abs(d)} s</button>' for d in (-10, 10, 30))
         lien = f' · <a href="{esc(t["url"])}" target="_blank">page</a>' if t.get("url") else ""
         choix = "".join(f'<label><input type="radio" name="{esc(k)}" value="{v}">{l}</label>'
                         for v, l in (("garder", "Garder"), ("refuser", "Refuser"), ("hesite", "J'hésite"))) if avis else ""

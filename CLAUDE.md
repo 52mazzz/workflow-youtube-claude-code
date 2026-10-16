@@ -43,7 +43,7 @@ Permis sans demander (paquet Python, outil en ligne de commande, version GPU…)
 
 ## Économie de tokens (obligatoire)
 
-- Les 20 réflexes du skill `economie-tokens` valent pour toute session. Le charger avant une tâche lourde (dérush, montage, veille, audit) ; lancer son audit (`scripts/audit_contexte.py .`) après un changement de skills ou de `CLAUDE.md`.
+- **Mode éco actif par défaut** (skill `economie-tokens` § Mode éco), sans attendre qu'on le demande ; « mode normal » le coupe. Le charger avant une tâche lourde (dérush, montage, veille, audit) ; lancer son audit (`scripts/audit_contexte.py .`) après un changement de skills ou de `CLAUDE.md`.
 - Un script avant le modèle : ce qui est mécanique (état, rangement, contrôles, mesures) passe par `repo.py`, `controle.py`, `dosage.py`, etc.
 - Lire le strict nécessaire : chemin exact, et pour les gros fichiers (transcriptions, `derush_*.json`, bilans `.json`) la partie utile avec `Grep` ou une plage de lignes, jamais tout par défaut. Exception : un fichier qu'un skill dit de lire « en entier » (ex. `montage-capcut/references/preferences.md` avant de monter) se lit en entier, sans économie.
 - Pas de sous-agent pour une recherche de quelques fichiers ; les agents nommés seulement aux étapes qui les prévoient.

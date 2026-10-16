@@ -10,7 +10,7 @@ effort: high
 À utiliser avec le skill nano-banana-pro-prompting pour la syntaxe des prompts, et youtube-titles-ab pour le titre associé.
 
 ## Contexte de la chaîne
-Lire `~/.claude/youtube/preferences.md`, section « Miniatures » : chaîne sans visage, mascotte optionnelle, format validé « conversation avec l'IA », texte de 3 à 4 mots. Si l'utilisateur valide une nouvelle préférence, l'ajouter dans ce fichier, pas ici.
+Lire `~/.claude/youtube/preferences.md`, section « Miniatures » : chaîne sans visage, mascotte optionnelle, texte de 3 à 4 mots. Si l'utilisateur valide une nouvelle préférence, l'ajouter dans ce fichier, pas ici.
 - **Mascotte (le Tsar)** : lire `~/.claude/youtube/mascotte.md` (description, couleurs, tableau des expressions). Choisir l'image de `~/.claude/youtube/mascotte/` dont l'expression raconte le concept (surprise, doute, gêne, rire, réflexion, explication, tête, en pied), la passer en image 1 dans le prompt (« Use image 1 as the mascot, keep its exact design, colors and proportions ») et nommer le fichier dans le livrable pour que l'utilisateur la joigne. Ne pas la poser sur le rouge de la chaîne (elle disparaît). S'il faut une expression qui n'existe pas, partir de la plus proche et demander une variation, sans réinventer le personnage.
 - `~/.claude/youtube/apprentissages.md` dit quels leviers de miniature ont gagné les Test & Compare précédents (pas à relire s'il a déjà été lu dans la conversation).
 
@@ -31,7 +31,9 @@ Coche l'étape 7 de `suivi.md`.
 ## Références visuelles (avant de proposer un concept)
 Comme les titres, les concepts partent des miniatures de vidéos qui ont dépassé leur médiane sur le même sujet ou le même format, pas seulement des miniatures de la chaîne.
 - Reprendre la même sélection `refs-sujet.json` que pour les titres et télécharger ses miniatures dans cet ordre : `$PY ~/.claude/skills/yt-viral/swipe.py --refs-selection videos/<id>/refs-sujet.json --top 8 --thumbs videos/<id>/miniatures-refs/`. Les ouvrir et les regarder vraiment. Si la sélection manque, la créer avec `selection.py` avant ce contrôle ; le classement global ne la remplace pas.
-- Pour chacune, noter en une ligne : sujet principal, nombre d'éléments, texte (mots exacts), couleurs dominantes, présence d'un logo, d'un avant-après ou d'un personnage. Puis les 2 ou 3 constantes parmi les outliers.
+- **Analyse** (2026-10-16) : `$PY ~/.claude/skills/youtube-thumbnail-prompts/miniature.py videos/<id>/miniatures-refs/*.jpg --grille` → mesures de chaque miniature (contraste, texte, coin de la durée, aperçus) et une grille numérotée à 246 et 120 px. Regarde la grille 120 px avec Read. Pour chacune, un tableau d'une ligne : n°, multiple de la médiane, sujet principal, nombre d'éléments, texte (mots exacts), couleurs, logo / avant-après / personnage, **levier** (ce qui donne envie de cliquer), **à changer** (ce qui est faible : illisible à 120 px, trop d'éléments, texte qui répète le titre, coin de la durée chargé, ou « rien »). Puis les 2 ou 3 constantes parmi les outliers.
+- **Choix de l'utilisateur** : envoie la grille (SendUserFile, `render`) avec le tableau, puis AskUserQuestion `multiSelect: true` : « Lesquelles t'attirent le plus ? » (4 options par question, 2 questions pour 8 miniatures ; libellé = n° + 3 mots, multiple en description). Ne conseille pas avant ce choix : c'est son œil de spectateur qu'on mesure.
+- **Adaptations** : pour chaque miniature choisie, propose (1) ce qu'on garde (le principe : composition, levier, contraste), (2) ce qu'on corrige de ses défauts relevés plus haut, (3) l'adaptation à la vidéo : le sujet et les éléments de `script.md`, la mascotte, le logo, le texte de 3 à 4 mots qui complète le titre, (4) si besoin, ce que **la vidéo** doit changer pour tenir la promesse de la miniature : un plan ou un résultat à tourner ou capturer (à noter dans `resultats.md`, « Captures à garder »), une scène à mettre plus tôt. Les concepts de miniature partent de ces choix ; une miniature non choisie ne sert de base qu'en pari, signalé.
 - Chaque concept proposé indique la miniature de référence dont il reprend le principe (ou « pari original ») et ce qui le distingue : ne jamais reproduire une miniature existante, ni ses personnages, ni son texte.
 - Si le téléchargement échoue (réseau bloqué), le dire et s'appuyer sur la description des titres de référence et les formats validés de `preferences.md`, en le signalant.
 - Les formats validés de `preferences.md` restent des préférences de forme ; si les références montrent un autre principe qui marche nettement mieux sur ce sujet, le proposer comme variante de test plutôt que de l'écarter.
@@ -45,14 +47,13 @@ Comme les titres, les concepts partent des miniatures de vidéos qui ont dépass
 - Contraste de couleurs fort entre le sujet et le fond (chaud contre froid).
 
 ## Formats validés par la chaîne
-Voir `preferences.md` (format « conversation avec l'IA » et ceux validés depuis).
+Voir `preferences.md` § Miniatures.
 
 ## Leviers de clic
 - Transformation / avant-après (même objet, même angle, écart maximal).
 - Curiosity gap : montrer une partie seulement, masquer le vainqueur, porte entrouverte.
 - Incrédulité : « ceci est X » sur une image qui ne ressemble pas à X.
 - Affrontement : A vs B, même scène, deux résultats visiblement différents.
-- Décalage humoristique : réponse calme ou culottée (« Facile. ») face à une demande ambitieuse ou un résultat excessif.
 - Menace / tension : élément inquiétant à moitié caché.
 
 ## Format du prompt miniature

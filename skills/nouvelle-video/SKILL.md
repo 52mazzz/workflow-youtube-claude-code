@@ -49,9 +49,17 @@ Une vidéo par semaine ne tient que si chaque étape coûte ce qu'elle rapporte.
 
 Pas de mesure du temps passé (décidé le 2026-10-01) : le parcours se juge sur les bilans. Si un bilan montre qu'une étape allégée a coûté (ouverture, taux de clics), elle repasse en complet pour la vidéo suivante, et c'est noté dans « Actions pour la prochaine vidéo ».
 
+## Tour 0 : longue ou Short, puis le domaine (avant la veille, 2026-10-16)
+
+Avant toute veille, une seule fenêtre AskUserQuestion, deux questions (sautées si la demande les tranche déjà) :
+- **Q1, Vidéo longue ou Short ?**
+- **Q2, Quel domaine ?** (`multiSelect`) IA seule / IA + gaming / IA + tech / gaming pur (périmètre : `preferences.md` § Chaîne). Tout cocher = peu importe.
+
+Short → passe au skill short avec le ou les domaines : sa fenêtre ne propose que des idées de ces domaines. Longue → la phase 1 vise ces domaines (`references/veille.md` § 3) et la phase 2 ne propose que leurs idées.
+
 ## Phase 1 : Veille et idées (skills yt-viral + youtube/ideate)
 
-**Veille légère ou complète.** Légère par défaut chaque semaine (les chaînes qui ont un outlier récent, celles découvertes récemment, et 4 à 6 recherches fraîches que tu écris) ; complète toutes les 4 semaines (toutes les chaînes suivies et les recherches de base). La date de la dernière complète est celle du fichier le plus récent `~/.claude/youtube/references/*-veille-complete.json`. Dis en une ligne laquelle tu fais et pourquoi. Après une **veille complète**, lance aussi le mini-audit mensuel de la chaîne (skill chaine-youtube, section 1). Dans tous les cas, lis le résultat du dernier sondage Communauté (`~/.claude/youtube/chaine.md`) : l'option gagnante prend `"sondage": true` dans la grille.
+**Veille légère ou complète.** Légère par défaut chaque semaine (les chaînes qui ont un outlier récent, celles découvertes récemment, et 4 à 6 recherches fraîches que tu écris) ; complète toutes les 4 semaines (toutes les chaînes suivies et les recherches de base). La date de la dernière complète est celle du fichier le plus récent `~/.claude/youtube/references/*-veille-complete.json`. Dis en une ligne laquelle tu fais et pourquoi. Après une **veille complète**, lance aussi le mini-audit mensuel de la chaîne (skill chaine-youtube, section 1). Dans tous les cas, lis le résultat du dernier sondage Communauté (`~/.claude/youtube/chaine.md`) : l'option gagnante prend `"sondage": true` dans la grille. Lis aussi `~/.claude/youtube/idees-videos.md` (idées notées en passant par l'utilisateur) : chacune entre dans la grille comme les autres.
 
 Toute la phase 1 suit **`references/veille.md`** (dans ce skill), à lire en entier au début de la phase : la collecte en une commande (`veille.py collecte`, skill yt-viral : classement par multiple de la médiane avec un plancher de vues, deuxième passage sur les chaînes découvertes, dynamique d'une semaine à l'autre, chaînes suivies dans `chaines.json`), le créneau français (`veille.py creneau`), la grille de classement des idées (`veille.py grille`) et `idees.md`. Ne lis que `veille/veille-resume.md`, pas les JSON bruts.
 
@@ -60,7 +68,7 @@ Toute la phase 1 suit **`references/veille.md`** (dans ce skill), à lire en ent
 Pose les décisions par tours, avec AskUserQuestion. Tour 1 :
 - Quelle idée (parmi celles de `idees.md`) ? Mets en premier celle qui a le meilleur rapport preuve / faisabilité. Pour une paire « copie fidèle / version originale », propose les deux comme options distinctes et rappelle la touche d'originalité en une phrase.
 - Le jeu ou le sujet précis, si l'idée est une série générique.
-- Duel Claude vs ChatGPT, Claude seul, ou 3 IA ?
+- Duel Claude vs ChatGPT, Claude seul ou 3 IA ? (pas posée pour le gaming pur)
 - Capacité de production cette semaine (vidéo lourde ou format léger).
 
 Tour 2, selon les réponses : méthode (1 prompt sans correction, prompt + corrections, itérations libres), critères de jugement du gagnant (`multiSelect`), appel final aux commentaires.

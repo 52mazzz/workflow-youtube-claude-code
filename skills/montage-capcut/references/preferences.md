@@ -35,7 +35,7 @@ pour les **vidéos longues** comme pour les Shorts. Vérifiée par `dosage.py <i
 | Changements d'image | **10 à 15**, pointes à 20 dans l'accroche et les tests (8,1 ; 9,3 ; 15 à 23) ; des résultats lisibles plutôt que des coupes pour le chiffre. **Les cibles sont des contrôles, pas des quotas** (retour du 2026-10-08) : jamais un plan ajouté pour le compteur ; un plan d'illustration montre ce que la voix dit à ce moment, avec ce que la vidéo a déjà montré ou le test en cours (capture de la consigne, de l'annonce de l'IA, type `capture` avec `zones`), **jamais un moment à venir** (seul « À venir » en montre) ; une cible manquée honnêtement se justifie |
 | Image immobile | **moins de 35 % du temps** (66 ; 54 ; 25) |
 | Zooms | **5 à 7** (2,1 ; 3,8 ; 4,8) : 3 à 5 **légers** (1,08 à 1,15) calés sur un mot ou un événement, jamais deux de suite ; **un zoom de lecture fort** (1,5× à 3×) environ une fois par minute sur un texte, un bouton, un chiffre du jeu, tenu pendant la phrase, sorti par une coupe ; **respiration** (choisie le 2026-10-08 : une poussée de 1,07 étalée sur 30 s était invisible, image immobile 83 %) sur chaque **séquence** de jeu : **une seule poussée lente par plan, tenue jusqu'à la coupe, jamais de dézoom lent ni de retour à chaque phrase** (retour du 2026-10-13 sur gojo-ia : « zoom, revient, re-zoom » se voyait trop ; `"slow": {"scale": 1.08, "periode": 10.0, "min_dur": 0.6, "mode": "unique"}` ; l'ancien mode « pousse » remettait l'image à 1 à chaque début de phrase, l'aller-retour doux = `"mode": "vague"`) ; les jump cuts d'un même moment du rush (moins de 1 s sautée) forment une seule séquence, l'échelle continue d'une coupe à l'autre ; elle ne repart de 1 qu'à un vrai changement de plan, caché par la coupe (`cadrage.py`). Un zoom rapide part de l'échelle en cours (montée adoucie de 0,2 s, jusqu'à 0,45 s pour un zoom de lecture de 2× et plus) et sort par la coupe suivante (retour en douceur seulement si elle est à plus de 3 s) : **jamais « lent, retour à la normale, rapide »** (retour du 2026-10-08) ; jamais deux à moins de 2 s, jamais sous un plein écran (`zooms.py` les écarte). Adoucis, jamais de tremblement (filtre perspective sous-pixel) ni de flou |
-| Musique | **la voix − 13 dB** (`audio.py`, `musique_sous_voix` ; 22,6 ; 28 ; 9), jamais baissée sous la voix ; le fond change 3 à 6 fois par minute (morceau, coupure, reprise) ; **jamais de blanc entre deux musiques** : un changement de morceau enchaîne directement sur le suivant, sur le mot du moment fort (retour du 2026-10-13 sur gojo-ia : « pas de blanc, ça fait bizarre » ; remplace les coupures franches d'1 s) ; toujours **aucune musique quand celle du jeu s'entend** |
+| Musique | **la voix − 13 dB** (`audio.py`, `musique_sous_voix` ; 22,6 ; 28 ; 9), jamais baissée sous la voix ; le fond change 3 à 6 fois par minute (morceau, coupure, reprise) ; un changement de morceau enchaîne directement sur le suivant, sur le mot du moment fort (pas de blanc entre deux morceaux, retour du 2026-10-13 sur gojo-ia) ; **coupures voulues** sur les chutes, réactions et apartés (2026-10-16, référence LAirHisson) : la musique s'arrête net sur le premier mot et reprend net, 0,8 à 2 s, environ 6 par minute (`video.json` `"silences_musique"`) ; un morceau par partie (intro énergique, explication calme, tests énergiques) ; **la musique continue même quand celle du jeu s'entend** (2026-10-16) ; coupure de musique : arrêt net sur le premier mot de la chute, reprise sur le changement de plan suivant (2,5 s au plus), jamais au hasard d'une phrase |
 | Bruitages | **12 à 18** (19 ; 16 ; 15), sur chaque élément et chaque événement du jeu, groupés sur les moments forts, pas un whoosh à chaque coupe. **Arbitre** (`audio.py`, 2026-10-08) : deux éléments au même instant (moins de 0,15 s) = un seul son, le plus fort ; au plus 3 moments sonores par seconde ; les sons voulus ensemble d'un même élément restent (whoosh + impact de la carte). Zoom léger = tick, zoom de lecture = whoosh court |
 
 **L'accroche** (0 à 45 s ; script : skill nouvelle-video, phase 4)
@@ -51,8 +51,7 @@ pour les **vidéos longues** comme pour les Shorts. Vérifiée par `dosage.py <i
 **Le corps, en deux temps** (décision du 2026-10-09 : la première IA en entier, puis la seconde ; détail dans
 `skills/nouvelle-video/references/accroches-script.md`)
 - **Partie 1 (Claude)** : chaque test avec sa **carte titre courte** (type `carte`, plein écran 1,2 s, jamais réduite
-  dans le coin) et son **étiquette** en bas à gauche tout le test (type `pastille`, verte ou rouge à la fin), sans
-  point ; transition de 2 s sur le récapitulatif de ses étiquettes.
+  dans le coin), **sans étiquette en bas à gauche** (règle du 2026-10-16) ; transition de 2 s sur le récapitulatif.
 - **Partie 2 (ChatGPT)** : mêmes cartes et étiquettes, dans le même ordre ; chaque test finit par l'**écran partagé** de
   3 s (type `partage`, Claude à gauche) puis le point, et la **frise** (type `progression`) avec le score se met à jour.
   Aucun gagnant avant le dernier test.
@@ -63,8 +62,12 @@ pour les **vidéos longues** comme pour les Shorts. Vérifiée par `dosage.py <i
 - **Tsar en mème de réaction**, environ une fois par test (décision du 2026-10-07, remplace « Tsar rare ») : sur les
   moments drôles ou ratés, en réaction (type `reaction`) ou dans une image générée posée en `insert` (comme la mascotte
   de Prompt Potato).
-- **Une phrase à l'écran** environ une fois par minute (type `soustitre`, la phrase entière qui frappe, voir
-  sukuna-ia en bas) ; **jamais de sous-titrage intégral** de la voix.
+- **Sous-titres de la chaîne = style de sukuna-ia-short1, VERROUILLÉ** (2026-10-16 : « le lock pour les sous-titres de la
+  chaîne ») : groupes de **1 à 3 mots**, **minuscules** sauf noms propres, **sans ponctuation**, Montserrat 900 blanc avec
+  halo sombre, le groupe pope d'un bloc et disparaît net au suivant (`soustitre` : `style` "reference" est le défaut du
+  kit, mots à `t` 0 ; 16/9 : `taille` 84, `bas` 150, `largeur` 1400). Coupure aux fins de phrase et avant les petits mots
+  de liaison (« à Claude | un mod Minecraft »). Vidéo longue : toute l'accroche, puis les phrases qui frappent ; **jamais
+  de sous-titrage intégral** de la voix (les Shorts : voir § Shorts).
 
 **Le verdict et la fin**
 - **Une carte de note par IA** (type `note` : « 7/10 », deux ou trois points forts ou faibles), puis la frise finale.
@@ -79,7 +82,7 @@ le temps compte.
   que `revue.py` soit propre et que j'aie regardé toutes ses planches (chaque glissement, zoom, élément).
 - **Plan vérifié avant tout rendu** (`verifie_plan.py`) : aucune variable inconnue ou manquante (jamais une valeur
   d'exemple du kit à l'écran), aucun texte qui déborde (réduit tout seul), aucun élément sur un autre.
-- **Places fixes** : étiquette (`pastille`) en bas à gauche, minuteur en haut à gauche (ou au centre dans l'accroche),
+- **Places fixes** : rien en bas à gauche (plus d'étiquette, 2026-10-16), minuteur en haut à gauche (ou au centre dans l'accroche),
   accéléré en haut au centre, Tsar en bas à droite, phrase à l'écran en bas au centre, flèche près de ce qu'elle vise.
   Les repères tenus pendant un test (étiquette, minuteur, accéléré) passent au-dessus des éléments ponctuels ; les
   flashs passent devant tout.
@@ -135,10 +138,9 @@ clics, motion design en fenêtres, export).
 - Les étiquettes de comparaison (Vanilla / Claude / Astra) doivent tomber **sur les changements de plan réels**
   (vérifier à l'image quel shader est montré), pas seulement sur la voix.
 
-## Sous-titres (phrases à l'écran)
-- Pas de sous-titrage intégral : la phrase qui frappe, en entier (élément `soustitre`, règle de sukuna-ia en bas).
-- **Tout en blanc**, aucune couleur, aucun emoji ; **ses mots exacts**, fautes de transcription corrigées
-  (retranscrire le passage à part) ; chaque mot apparaît quand il est dit ; rien sur un passage à transcription incertaine.
+## Sous-titres
+- Style verrouillé : voir la direction. Blancs, sans emoji, **ses mots exacts** (fautes de transcription corrigées), rien
+  sur un passage à transcription incertaine.
 
 ## Musique
 - **Règle du 2026-10-08, prime sur tout le reste de ce fichier** (remplace celle du 2026-10-05, « seulement ce qu'il
@@ -153,6 +155,11 @@ clics, motion design en fenêtres, export).
   marqués `shorts_seulement` dans `catalogue.json`, `musique.py choisir` ne les propose qu'en vertical. Il en fournit
   et me laisse choisir le moment de chacun (étiqueter `moments` et `humeur` d'après le morceau). Méthode : outils.md §
   Musiques. Les SFX ne sont pas concernés.
+- **Ses goûts, écoute du 2026-10-16 (3 tours, 4 gardés sur 45)** : **explication → boom bap / hip-hop jazzy** (An
+  Intriguing Story, Chimes de 808xri) ; **tests → rock-synthé rétro façon jeu vidéo** (Gran Prix, Neon Highway) ;
+  refusés : batteries épiques et tribales, EDM, drum and bass, phonk, electro swing, funk et acid jazz, lofi et chill,
+  future bass, surf rock, musiques « détective / crime », drill, pop « upbeat » générique. Chercher dans ces deux
+  directions d'abord, puis élargir ; l'intro énergique n'a encore rien trouvé (rock synthé / cyberpunk à essayer).
 - **Ses goûts, mesurés à l'écoute du 2026-10-08** (18 candidats, 5 gardés ; `musique.py` en tient compte : genres gardés /
   refusés, profils des moments) :
   - **verdict et hook → vraies batteries** (percussions, stomp, batterie rock : 2 sur 2 gardés, et il les voit aussi au
@@ -179,16 +186,16 @@ clics, motion design en fenêtres, export).
 
 ## Retours de pokemon-ia (2026-10-03) — priment sur les règles plus anciennes ci-dessous
 - **Transitions variées** : glissements latéraux gauche / droite (push) **adoucis (accélèrent puis ralentissent),
-  jamais linéaires, sans aucun flou**, avec whoosh ; ou **coupes nettes** ; flashs. **Pas de transition en montée
-  (riser)** (essayée puis refusée le 2026-10-03). Remplace « pas de whoosh » et « pas de glissement ».
+  jamais linéaires, sans aucun flou**, avec whoosh ; ou **coupes nettes** ; flashs. **Pas de transition en montée (riser)** entre deux scènes, sauf
+  **un riser court entre l'accroche et la suite** (demande du 2026-10-16 : « Sharp Riser », son `riser_sharp`, fini
+  pile sur la coupe). Remplace « pas de whoosh » et « pas de glissement ».
 - **Flashs** : hook = son `flash_camera` (son fichier) ; tous les autres flashs = le son CapCut « click (camera shutter
   sound single shot) » de LEOPARD, qu'il a mis en favori (`assets/sfx/flash_capcut.wav`).
 - **Hook** : entrée en flash caméra (image + `flash_camera`) sur la première phrase.
 - **Clics (2026-10-05, vidéos et Shorts)** : tout clic, déclic ou obturateur = **uniquement** le son CapCut « click (camera
   shutter sound single shot) » (`assets/sfx/flash_capcut.wav`, volume 1) ; plus jamais `declic`, `declic_2`, `clic`. Il a
   remplacé à la main les déclics du Short glacon-ia ; `short.py` (`CLIC`) et `export_capcut.py` le font maintenant.
-- **Musique** (niveau : voir la direction) ; **aucune musique quand la musique du jeu
-  s'entend** (partie Claude de pokemon-ia), mais **de la musique quand celle du jeu est très basse** (partie ChatGPT) ;
+- **Musique** (niveau et musique du jeu : voir la direction) ;
   il n'a pas aimé les 8 morceaux Pixabay en stock : il fournit ses musiques (pokemon-ia : hook, quirky, chill jazz,
   tribal jazz, `04_RESSOURCES/musiques/perso/`).
 - **Tout ce qui bouge a un SFX** : chaque ligne qui apparaît dans une fenêtre, chaque mot barré, chaque IA qui entre
@@ -280,14 +287,9 @@ clics, motion design en fenêtres, export).
   sukuna-ia-short1 : à prendre dans les rushs, ex. « mon apparence a bien changé ») ; **chaque chose nommée
   s'illustre en gros au milieu** sur son mot : logo d'une IA (`vignette` `"cadre": false`), personnage ou œuvre
   (`vignette`), deux IA (`duel`).
-- **Sous-titres d'un Short (2026-10-13, sukuna-ia-short1 ; remplace le mot à mot de gojo-ia)** : sur **tout le Short**
-  (exception à « jamais de sous-titrage intégral »), comme sa référence (Short de LAirHisson
-  https://www.youtube.com/shorts/mnhYIR1v9xk) : ses mots exacts par **groupes de 1 à 3 mots**, **minuscules** sauf les
-  noms propres, **sans ponctuation**, Montserrat 900 blanc **sans contour**, halo sombre flou autour des lettres, lettres
-  serrées (ses captures du 2026-10-13) ; le groupe **pope** d'un bloc (surgit à 60 %, rebondit à sa taille en 9 images,
-  sans glisser) et disparaît net quand le suivant arrive (`soustitre` `"style": "reference"`, mots à `t` 0,
-  `taille` 92, `bas` 600 : vers 65 % de la hauteur ; plus haut quand Tsar est à l'écran) ; **pas de sous-titre sur un
-  juron** (« putain »).
+- **Sous-titres d'un Short** : sur **tout le Short** (exception à « jamais de sous-titrage intégral »), au style verrouillé
+  (voir la direction ; référence LAirHisson https://www.youtube.com/shorts/mnhYIR1v9xk), `taille` 92, `bas` 600 (vers 65 %
+  de la hauteur, plus haut quand Tsar est à l'écran) ; **pas de sous-titre sur un juron** (« putain »).
 - **Étiquette du test centrée en haut, au-dessus du jeu** (`pastille` `"place": "haut"`, 2026-10-13).
 - **Transitions entre les parties** (accroche, chaque IA, verdict), à l'image et au son : glissement avec whoosh, ou
   flash devant un plein écran (2026-10-13).
@@ -324,15 +326,53 @@ clics, motion design en fenêtres, export).
   demander avant de supprimer un **projet CapCut** ; vérifier le panneau Médias de tous les projets avant.
 
 ## Retours de sukuna-ia (2026-10-10) : primes sur les sections plus anciennes
-- **Un seul nom de test à l'écran** : l'étiquette en bas à gauche (`pastille`, « IA : nom du test », ou le nom seul dans un Short à une seule IA, couleur vert / rouge) ; la `carte` ne fait que son plein écran (1,2 s), jamais de carte réduite en haut à droite en plus.
+- **Le nom du test** est donné par la `carte` (plein écran 1,2 s) ou la frise, jamais de carte réduite en haut à droite ni d'étiquette en bas à gauche (2026-10-16).
 - **Accroche : peu de plans de résultats.** Les résultats (domaine, flèche, coupes) se voient une seule fois : écran partagé ou « À VENIR », pas les deux (précisé le 2026-10-10) ; le reste, et pendant les règles, des plans neutres du jeu (début de partie, interface, objets).
 - **Séparer l'accroche de l'explication du plan** par une transition (glissement à la fin de l'accroche, `video.json` `transitions`), pas une coupe sèche.
 - **Jamais un trou de quelques images** entre deux éléments plein écran (scène, carte, progression) : le jeu ne doit pas apparaître 1 à 10 images (« 1 frame de jeu, puis l'écran ChatGPT en gros, puis le jeu »). Un plein écran commence pile sur la coupe d'image et le suivant pile à sa fin.
 - **Pas de barre sous « À VENIR »** (retirée du kit).
-- **Pas de mot isolé** (« DINGUERIE », « BUGUÉ », « COPIÉ ») : la **phrase entière**, ses mots exacts (fautes de transcription corrigées), mot à mot sur la voix (`soustitre`, `bas` 190 pour ne pas toucher l'étiquette). Vaut aussi pour les rappels de règles (« Je valide le plan tel quel »). Remplace « un mot-clé en énorme légende » de la direction.
+- **Pas de mot isolé** (« DINGUERIE », « BUGUÉ », « COPIÉ ») : la **phrase**, ses mots exacts (fautes de transcription corrigées), au style verrouillé (voir la direction). Vaut aussi pour les rappels de règles (« Je valide le plan tel quel »). Remplace « un mot-clé en énorme légende » de la direction.
 - **Musique refusée** : « Castle of Athanasius » (Spencer Y.K.) sur la partie test de Claude, refusée et supprimée de `perso/` (`catalogue.json`, `refuses`).
 - **Quand il cite l'œuvre ou le personnage** (« Sukuna », « Jujutsu Kaisen ») : une image par mot, dans une **case propre** (`vignette` : fond sombre, liseré blanc, coins arrondis), qui entre en pop sur le mot et ressort, avec ses bruitages ; pas de titre texte (`titre_jeu`) en plus. Il choisit les images sur une planche numérotée ; logo **occidental** de l'œuvre.
 - **Écran ennuyeux = vignette** (2026-10-10) : quand l'image bouge à peine ou que rien ne s'ajoute (`ennui.py`, étape 8b), on habille le passage d'une `vignette` de ce qui est nommé à ce moment, comme Sukuna et le logo de Jujutsu Kaisen dans l'accroche de sukuna-ia. Il choisit les images sur une planche numérotée ; un passage de jeu qui tient seul peut rester tel quel.
+
+## Retours de rick-morty-ia (2026-10-16, sur le premier MP4) : priment sur les sections plus anciennes
+Référence de montage donnée par lui : LAirHisson, https://youtu.be/bQuTHoUEKDM (coupures de musique, zooms, inventaires).
+- **Jeu à l'écran à 0:20 au plus** : couper ce qui retarde (phrases de passage, attente) ; un trou de génération = une
+  carte mème courte (« One eternity later », clip plein écran avec son son : `incrustations` `"plein": true`, `"vitesse"`).
+- **Zooms rapides** : zoom sur la chose citée, maintien court, **retour d'un coup au cadrage normal** (`video.json`
+  `zooms` `"retour": "net"`) ; jamais rester zoomé jusqu'à la coupe (« la bulle de Rick »).
+- **Inventaire ou menu à l'écran** : **avancée lente et fluide** vers l'objet et son infobulle, ×1,5 à ×1,6 sur toute
+  la durée, sortie nette (`zooms` `"avancees"`).
+- **Son de tous les zooms** : un souffle léger, sans impact (« c'est pour des zooms, pas des transitions ») : `zoom_souffle`
+  (`video.json` `"son_zoom"`) ; **la montée du zoom suit le son** (attaque → pic, `zooms` `"rampe"` 0,17).
+- **Bruitages de moments, trouvés par moi sur toute la vidéo** (2026-10-16 : « ne te limite pas à mes exemples ») :
+  réussite (`moment_bonne`, ex. premier coup au golf), raté (`moment_triste`), victoire (`moment_victoire`), surprise « What ? »
+  (`moment_boom`), changement d'avis (`moment_scratch`), rien ne se passe (`moment_criquets`), rebond (`moment_boing`),
+  « j'ai capté » (`moment_idee`), émerveillement (`moment_wow`, `moment_foule`) ; posés sur le mot (`video.json` `"sfx"`),
+  souvent avec une coupure de musique. **Avec parcimonie** : sur 21 proposés, il n'en a gardé que 3 (boom sur le premier
+  « What ? », « bonne réponse » au premier coup de golf, criquets sur « il n'y a pas de mob ») : viser 3 à 5 par vidéo,
+  seulement les gags les plus nets, et lui donner la liste à cocher.
+- **Pas de micro-coupes en rafale** (bouts d'image de moins de 0,6 s collés, « c'est beugué ») : après le raccourcissement
+  des blancs, chercher les rafales de segments courts et les couper d'un bloc ; les « euh » se coupent aussi.
+- **Pas de silence** : tout passage sans parole de plus de 0,6 s se coupe (détection de voix Silero), une action de jeu
+  garde 1,2 à 2 s au plus ; les hésitations et doublons (« je vois aucun mob » après « il n'y a pas de mob ») se coupent.
+- **Frise** : l'icône de chaque objet dans sa case (texture du mod, sinon une vignette du rush).
+- **Pas de texte de durée ou de nombre d'éléments** inventé par moi (« OPUS 5.5 : 3 H 30, 28 ÉLÉMENTS » retiré).
+- **Riser** aussi entre le dernier test et la fin.
+- **Blancs d'action** (téléportation, explosion, feux d'artifice…) : 2 à 4 s, pas plus.
+- **Son du début** : son fichier `flash_debut` (`video.json` `"son_entree"`).
+- **Frise et étiquettes : aucune notion de réussite ou d'échec** (pas de vert, pas de rouge, pas de coche).
+- **Frise en style Minecraft** (sa référence : carte « Règle n°5 » de LAirHisson) : police pixel Monocraft (OFL), mais
+  **couleurs de la chaîne** (rouge et noir, pas de jaune), cases façon inventaire, **fond « grille rouge »** choisi
+  parmi trois (`frise` `"style_fond": "grille"`).
+- **Musiques** : seulement du libre en vidéo longue (il a confirmé : pas ses OST Persona, Cuphead, Zelda) ; il veut des
+  propositions variées, pas un seul genre.
+
+## Retours de rick-morty-ia (2026-10-15) : priment sur les sections plus anciennes
+- **Mèmes = courts clips vidéo récents** (année en cours ou précédente ; les templates imgflip figés sont refusés : « c'est des mèmes de y'a 10 ans »), 2 à 4 s, **au centre pendant le moment**, liseré blanc, **leur son baissé** sous la voix (−30 LUFS) : `plan.json` `"incrustations"` [{id, fichier, at, dur, src, crop, largeur}] (`rendu.py`, `audio.py`). Peu de clips (2 gardés sur 7), chacun placé là où le sens du mème colle. **Aperçu vidéo avec son montré avant de toucher au plan.**
+- **Prompt à l'écran** : texte recomposé (`scene_description`), mots clés surlignés par un vrai trait de surligneur qui se trace de gauche à droite, un son de feutre par mot (`surligne` [{texte, t}], son `surligneur`).
+- **Arrivée dans le jeu** (garage) = première scène de jeu, hors frise.
 
 ## Retours de gojo-ia (2026-10-13) : priment sur les sections plus anciennes
 - **Laisser voir chaque action en entier** : un pouvoir, un sort, une explosion se montre du lancement à l'effet tant qu'il est à l'écran, même sans parole (« le Bleu pas visible ») : au dérush, ces passages vont dans `"garder"` de `nettoie_derush.py`, repérés sur une planche à 1 image par seconde ; la règle des blancs coupés ne s'y applique pas.

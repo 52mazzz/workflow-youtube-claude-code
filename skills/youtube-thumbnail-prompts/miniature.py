@@ -20,6 +20,9 @@ Then:
     is used, labelled "approximative": its scale is not CLIP's, so no verdict, only which side the
     thumbnail is closer to (the channel or the competitors).
 
+With --grille (on the reference thumbnails of swipe.py --thumbs, before any concept): a numbered GRILLE
+of all of them at 246 px and at 120 px, to show the user so they pick the ones that attract them.
+
 Numbers describe the image; they do not predict the click rate. Test & Compare decides.
 Needs: pip install opencv-python-headless numpy (setup.py --vision also installs CLIP).
 Thumbnails of refs.json / ma-chaine.json are downloaded from i.ytimg.com (public).
@@ -163,6 +166,30 @@ def planche(target, others, out):
     return str(out)
 
 
+def grille(images, out):
+    """All the images at 246 px, 4 per row, each with its number (the 01- prefix of swipe.py --thumbs),
+    so the user can pick the ones that attract them; their 120 px versions on a second sheet."""
+    cv2, np = need_cv()
+    for (W, H), name in (((246, 138), "grille.png"), ((120, 68), "grille_120.png")):
+        G, cols = 10, 4
+        rows = (len(images) + cols - 1) // cols
+        sheet = np.full((rows * (H + G) + G, cols * (W + G) + G, 3), 15, np.uint8)
+        for k, p in enumerate(images):
+            t = cv2.imread(str(p))
+            if t is None:
+                continue
+            y, x = G + (k // cols) * (H + G), G + (k % cols) * (W + G)
+            sheet[y:y + H, x:x + W] = cv2.resize(t, (W, H), interpolation=cv2.INTER_AREA)
+            m = re.match(r"(\d+)-", Path(p).name)
+            label = str(int(m.group(1))) if m else str(k + 1)
+            s = 0.8 if W > 200 else 0.5
+            cv2.rectangle(sheet, (x, y), (x + 6 + int(20 * s) * len(label), y + int(30 * s)), (0, 0, 0), -1)
+            cv2.putText(sheet, label, (x + 3, y + int(24 * s)), cv2.FONT_HERSHEY_SIMPLEX, s, (255, 255, 255), 2)
+        out.mkdir(parents=True, exist_ok=True)
+        cv2.imwrite(str(out / name), sheet)
+    return str(out / "grille.png"), str(out / "grille_120.png")
+
+
 # ---------------------------------------------------------------- similarity
 
 def embedder():
@@ -219,6 +246,8 @@ def main():
     if missing:
         sys.exit("introuvable : " + ", ".join(missing))
     out = Path(val("--dossier") or images[0].parent / "controle")
+    if "--grille" in a:
+        print("  grilles à montrer : " + ", ".join(grille(sorted(images), out)))
     comp_src, own_src = val("--concurrents") or val("--refs"), val("--chaine")
     comps = fetch_thumbs(comp_src, out / "concurrents", 11) if comp_src else []
     own = fetch_thumbs(own_src, out / "chaine", 11) if own_src else []

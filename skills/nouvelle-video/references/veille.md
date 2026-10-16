@@ -15,7 +15,7 @@ Lu au début de la phase 1. Les règles de session de `SKILL.md` (ne rien invent
 
 Dans les deux cas, une chaîne collectée il y a moins de 7 jours n'est pas recollectée (cache). La date de la dernière veille complète est celle du fichier le plus récent `~/.claude/youtube/references/*-veille-complete.json`. Dis en une ligne laquelle tu fais et pourquoi.
 
-**Les recherches fraîches** (en français et en anglais, des verbes et des angles variés, pas celles des semaines précédentes) : les nouveaux modèles d'IA, les sorties de jeux de la semaine, les tendances gaming, les formats « IA + création » (jeu, mod, musique, graphismes, animation, speedrun, simulation, agents qui jouent), et 1 ou 2 formats hors niche qui explosent (défis, simulations, « J'ai… ») à transposer en « IA + création ».
+**Les recherches fraîches** (en français et en anglais, des verbes et des angles variés, pas celles des semaines précédentes) : les nouveaux modèles d'IA, les sorties de jeux de la semaine, les tendances gaming, les formats « IA + création » (jeu, mod, musique, graphismes, animation, speedrun, simulation, agents qui jouent), et **2 ou 3 recherches hors niche** (gaming hors Minecraft, tech, création, divertissement : défis, simulations, « J'ai… », univers et jeux qui attirent) : elles fournissent les matières des idées croisées (§ 3). Le périmètre de la chaîne : `preferences.md` § Chaîne.
 
 ## 1. Collecter et classer
 
@@ -57,7 +57,9 @@ Lis `~/.claude/youtube/types-de-videos.md` (la base des types de vidéos) avant 
 
 **Règle « anglais sans français »** : pour tout concept qui existe en anglais et que `creneau` donne « libre », écris **deux idées jumelles** : la copie fidèle (adaptée à la chaîne) et la même idée avec **une** touche d'originalité (contrainte, enjeu, mélange avec un autre type, point de vue, matière). Les deux partagent la même preuve ; présente-les côte à côte.
 
-Applique le sous-skill `ideate` du skill youtube : 8 idées, chacune avec stratégie de trafic, urgence, accroche en une phrase, concept de miniature et **preuve chiffrée** (vidéo source, multiple, vues). Garde au moins une idée « format léger » (faisable vite) et une idée « tendance urgente » si une tendance existe.
+**Idées croisées (au moins 2 des 8, décidé le 2026-10-16)** : un **format** qui a marché × une **matière** qui a marché (univers, jeu, objet, tendance, de préférence trouvée par les recherches hors niche) × une **contrainte** inédite. Chaque morceau a sa propre vidéo source chiffrée ; le croisement, lui, n'a pas encore été fait. Dans `idees-grille.json`, remplace `multiple`/`vues` par `"morceaux": [{"role": "format", "source": "…", "multiple": 7.8, "vues": 71777}, {"role": "matière", …}]` : la grille note la preuve du **morceau le plus faible** (un morceau sans multiple compte 0 et rend la preuve inconnue). Pas de bonus d'originalité.
+
+Les 8 idées (croisées comprises) restent dans le ou les domaines choisis au tour 0 (`SKILL.md`), répartis entre eux s'il y en a plusieurs ; les recherches fraîches visent aussi ces domaines. Applique le sous-skill `ideate` du skill youtube : 8 idées, chacune avec stratégie de trafic, urgence, accroche en une phrase, concept de miniature et **preuve chiffrée** (vidéo source, multiple, vues). Garde au moins une idée « format léger » (faisable vite) et une idée « tendance urgente » si une tendance existe.
 
 **Classement par la grille** : écris les 8 idées dans `idees-grille.json` puis classe-les :
 

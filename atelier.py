@@ -8,11 +8,12 @@
 The page shows what the scripts already know, never a copy: repo.py (status, dates and stages of suivi.md, reviews
 due, publications not noted, what git has not sent or not fetched) and rangement.py (report only: the page empties
 nothing). Small actions on a click: maj (setup.py --pull), envoi (envoi.py), open a file or a folder of the repo in
-its usual app. The stages themselves stay with Claude: the page gives the phrase to say for the next one.
+its usual app, and rewrite a text of a video (videos/<id>/, its montage settings) in the page. The stages themselves
+stay with Claude: the page gives the phrase to say for the next one, and shows each stage with the files it names.
 
 Listens on this PC only (127.0.0.1), refuses any other Host (DNS rebinding), and every action needs the token of the
 page it served, so another site cannot click for you. Reads and opens only files inside the repo (never .git/ nor
-secrets/). Works on the repo it sits in (or $CLAUDE_REPO, for the tests).
+secrets/), writes only the texts of the videos (ECRITURE), never over a version newer than the one shown. Works on the repo it sits in (or $CLAUDE_REPO, for the tests).
 """
 import json, os, platform, re, secrets, subprocess, sys, threading, urllib.request, webbrowser
 from datetime import datetime
@@ -43,6 +44,10 @@ ETAPE = re.compile(r"^\s*- \[([ xX])\] (\d+[a-z]?)\. (.+)$", re.M)
 # files of a video in the order of the workflow, the others after them by name
 ORDRE = ("suivi.md", "idees.md", "script.md", "titres-miniatures.md", "fiche-tournage.md", "resultats.md",
          "description.md", "shorts.md")
+# where the page may write: the texts of a video and its montage settings, nothing of the workflow itself
+ECRITURE = (("videos",), ("montage", "08_HYPERFRAMES", "videos"))
+NOMME = re.compile(r"`([^`]+)`")
+AUSSI = {"9": " `description.md` `miniatures/`"}    # what a stage uses without naming it in suivi.md
 GIT = threading.Lock()                          # one git command at a time: fetch, status, maj, envoi
 
 
@@ -111,6 +116,62 @@ def fichiers(r, d, ext, recents=False):
     return [fichier(r, f) for f in fs]
 
 
+BLOC_PROMPT = re.compile(r"^```text\n(.*?)^```", re.M | re.S)
+A_JOINDRE = re.compile(r"`([^`]+\.(?:png|jpe?g|webp))`(?:\s*\((?:image )?(\d+)\))?", re.I)
+
+
+def joints(r, vd, texte):
+    """The images a paragraph says to attach, found in miniatures/ (by path or name) or in config/youtube/ (~/.claude/youtube)."""
+    out = []
+    for m in A_JOINDRE.finditer(texte):
+        nom = m.group(1)
+        if nom.startswith("~/.claude/youtube/"):
+            p = r / "config" / "youtube" / nom[len("~/.claude/youtube/"):]
+            trouve = p if p.is_file() else None
+        else:
+            cle = nom.removeprefix(f"videos/{vd.name}/").removeprefix("miniatures/")
+            trouve = next((p for p in sorted((vd / "miniatures").rglob("*")) if p.is_file()
+                           and p.relative_to(vd / "miniatures").as_posix().endswith(cle)), None)
+        out.append({"nom": nom, "role": f"image {m.group(2)}" if m.group(2) else "", "chemin": trouve.relative_to(r).as_posix() if trouve else None})
+    return out
+
+
+def prompts(r, vd):
+    """The image prompts of the last section of titres-miniatures.md that has any (the final ones), each with the
+    bold title and the paragraph just before it, and the images that paragraph says to attach."""
+    f = vd / "titres-miniatures.md"
+    if not f.is_file():
+        return []
+    sections = re.split(r"^(?=## )", f.read_text(encoding="utf-8"), flags=re.M)
+    sec = next((s for s in reversed(sections) if BLOC_PROMPT.search(s)), "")
+    out, pos = [], 0
+    for m in BLOC_PROMPT.finditer(sec):
+        avant = sec[pos:m.start()].strip().split("\n\n")[-1].strip()
+        pos = m.end()
+        t = re.match(r"\*\*(.+?)\*\*\s*:?\s*(.*)", avant, re.S)
+        out.append({"titre": t.group(1) if t else "", "intro": (t.group(2) if t else avant).strip(),
+                    "prompt": m.group(1).rstrip(), "joindre": joints(r, vd, avant)})
+    return out
+
+
+def fichiers_etape(r, vd, detail):
+    """The texts a stage names in backquotes: in the folder of the video (even not written yet: the page can start
+    it) or in config/youtube/ (~/.claude/youtube, read only); `miniatures/` asks for the images and prompts."""
+    out, vus = [], set()
+    for nom in NOMME.findall(detail):
+        nom = nom.removeprefix(f"videos/{vd.name}/").removeprefix("~/.claude/youtube/")
+        if nom.rstrip("/") == "miniatures":
+            out.append({"nom": "miniatures/", "chemin": None, "miniatures": True})
+            continue
+        if Path(nom).suffix.lower() not in TEXTES or "/" in nom or "\\" in nom or nom in vus:
+            continue
+        vus.add(nom)
+        p = vd / nom if (vd / nom).is_file() or not (r / "config" / "youtube" / nom).is_file() else r / "config" / "youtube" / nom
+        out.append({"nom": nom, "chemin": p.relative_to(r).as_posix(), "existe": p.is_file(),
+                    "editable": ecrivable(r, p) is not None})
+    return out
+
+
 def fiche(r, vid):
     """Everything about one video: stages, notes, its files grouped, its folders. None for an unknown id."""
     if vid not in {d.name for d in repo.video_dirs(r / "videos")}:
@@ -119,7 +180,10 @@ def fiche(r, vid):
     v = repo.video_info(vd)
     notes = re.search(r"^## ", v["text"], re.M)
     textes = fichiers(r, vd, TEXTES)
-    return {**resume(v, aujourdhui()),
+    res = resume(v, aujourdhui())
+    for e in res["etapes"]:
+        e["fichiers"] = fichiers_etape(r, vd, e["detail"] + AUSSI.get(e["num"], ""))
+    return {**res,
             "champs": {k: repo.field(v["text"], k) for k in ("Publiée le", "Lien", "Tournage")},
             "notes": v["text"][notes.start():].strip() if notes else "",
             "dossiers": [{"chemin": d.relative_to(r).as_posix(), "nom": nom}
@@ -129,7 +193,8 @@ def fiche(r, vid):
                         {"nom": "Miniatures", "fichiers": fichiers(r, vd / "miniatures", TEXTES)},
                         {"nom": "Réglages de montage", "fichiers": fichiers(r, mont, TEXTES)},
                         {"nom": "Données", "fichiers": [f for f in textes if not f["nom"].endswith(".md")]}],
-            "images": fichiers(r, vd / "miniatures", tuple(IMAGES))}
+            "images": fichiers(r, vd / "miniatures", tuple(IMAGES)),
+            "prompts": prompts(r, vd)}
 
 
 # ───────────── the whole production
@@ -229,7 +294,51 @@ def lire(r, chemin):
     if p is None:
         return None
     data = p.read_bytes()
-    return {**fichier(r, p), "texte": data[:TEXTE_MAX].decode("utf-8", "replace"), "tronque": len(data) > TEXTE_MAX}
+    return {**fichier(r, p), "texte": data[:TEXTE_MAX].decode("utf-8", "replace"), "tronque": len(data) > TEXTE_MAX,
+            "version": str(p.stat().st_mtime_ns), "editable": len(data) <= TEXTE_MAX and ecrivable(r, p) is not None}
+
+
+def ecrivable(r, p):
+    """p if the page may write it: a text of a video (ECRITURE), existing, or a new .md right in videos/<id>/."""
+    base = r.resolve()
+    try:
+        parts = p.resolve().relative_to(base).parts
+    except ValueError:
+        return None
+    if p.suffix.lower() not in TEXTES or not any(parts[:len(z)] == z and len(parts) > len(z) + 1 for z in ECRITURE):
+        return None
+    if p.is_file():
+        return p
+    neuf = p.suffix.lower() == ".md" and len(parts) == 3 and parts[0] == "videos" and p.parent.is_dir()
+    return p if neuf and not p.exists() else None
+
+
+def ecrire(r, chemin, texte, version):
+    """Saves a text rewritten in the page, refusing if the file changed since the page read it (Claude, the other PC)."""
+    if not isinstance(chemin, str) or not chemin or "\0" in chemin or ":" in chemin or chemin[0] in "/\\":
+        return {"ok": False, "sortie": "chemin refusé"}
+    p = ecrivable(r, r.resolve() / chemin)
+    if p is None or not isinstance(texte, str):
+        return {"ok": False, "sortie": "seulement les textes d'une vidéo (videos/<id>/, ses réglages de montage)"}
+    if len(texte.encode("utf-8")) > TEXTE_MAX:
+        return {"ok": False, "sortie": "texte trop long pour l'atelier : ouvre-le dans l'appli"}
+    if p.suffix.lower() == ".json":
+        try:
+            json.loads(texte)
+        except ValueError as e:
+            return {"ok": False, "sortie": f"JSON invalide, rien n'est enregistré : {e}"}
+    if p.is_file():
+        if str(p.stat().st_mtime_ns) != str(version):
+            return {"ok": False, "conflit": True, "sortie": "le fichier a changé depuis que tu l'as ouvert (Claude, maj ?) : "
+                    "copie ton texte, recharge-le, puis remets tes changements"}
+        if b"\r\n" in p.read_bytes():
+            texte = texte.replace("\r\n", "\n").replace("\n", "\r\n")
+    elif version:
+        return {"ok": False, "conflit": True, "sortie": "le fichier a été supprimé depuis que tu l'as ouvert"}
+    tmp = p.with_name(p.name + ".atelier-tmp")
+    tmp.write_bytes(texte.encode("utf-8"))
+    os.replace(tmp, p)
+    return {"ok": True, "sortie": f"enregistré : {chemin}", "version": str(p.stat().st_mtime_ns)}
 
 
 # ───────────── the server
@@ -288,14 +397,19 @@ class Atelier(BaseHTTPRequestHandler):
         self.repondre(404, {"erreur": "introuvable"})
 
     def do_POST(self):
+        r, path = self.server.repo, urlparse(self.path).path
+        n = int(self.headers.get("Content-Length") or 0)
+        limite = 4 * TEXTE_MAX if path == "/api/ecrire" else 65536    # JSON escapes can make a text longer
+        corps = self.rfile.read(n) if 0 < n <= limite else b""   # read even to refuse: an unread body resets the socket
+        self.close_connection = True
         if not self.hote_ok() or self.headers.get("X-Atelier") != JETON:
             return self.repondre(403, {"erreur": "refusé : recharge la page de l'atelier"})
-        n = int(self.headers.get("Content-Length") or 0)
         try:
-            data = json.loads(self.rfile.read(n).decode("utf-8") or "{}") if 0 < n <= 65536 else {}
+            data = json.loads(corps.decode("utf-8") or "{}")
         except ValueError:
             data = {}
-        r, path = self.server.repo, urlparse(self.path).path
+        if not isinstance(data, dict):
+            data = {}
         if path == "/api/maj":
             res = lancer(r, "setup.py", "--pull")
         elif path == "/api/envoi":
@@ -303,10 +417,15 @@ class Atelier(BaseHTTPRequestHandler):
             res = lancer(r, "envoi.py", *([message] if message else []))
         elif path == "/api/ouvrir":
             res = ouvrir(r, data.get("chemin"))
+        elif path == "/api/ecrire":
+            if n > limite:
+                return self.repondre(200, {"ok": False, "sortie": "texte trop long pour l'atelier : ouvre-le dans l'appli"})
+            res = ecrire(r, data.get("chemin"), data.get("texte"), data.get("version"))
         else:
             return self.repondre(404, {"erreur": "introuvable"})
         if path != "/api/ouvrir":
-            print(f"{datetime.now():%H:%M} {path[5:]} : {'ok' if res['ok'] else 'échec'}")
+            quoi = f"{path[5:]} {data.get('chemin')}" if path == "/api/ecrire" else path[5:]
+            print(f"{datetime.now():%H:%M} {quoi} : {'ok' if res['ok'] else 'échec'}")
         self.repondre(200, res)
 
 

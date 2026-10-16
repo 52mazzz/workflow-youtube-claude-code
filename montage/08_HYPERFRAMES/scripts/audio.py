@@ -17,7 +17,7 @@ Le mixage de contrôle est mesuré puis supprimé (place disque) sauf --garder-m
 """
 import json, shutil, sys
 from pathlib import Path
-from commun import MUSIQUES, SFX, read_json, remap, run, video, write_json
+from commun import HF, MUSIQUES, SFX, read_json, remap, run, video, write_json
 import subprocess
 
 MUSIC_LUFS = -20.0  # ancien réglage (0927) ; par défaut maintenant video.json "musique_lufs" ou MUSIQUE_FOND
@@ -27,11 +27,12 @@ MUSIQUE_FOND = -32.0
 MUSIQUE_SOUS_VOIX = 13.0
 VOL = {"pop": 0.35, "tick": 0.3, "croix": 0.4, "valide": 0.35,
        "impact": 0.35, "sub_drop": 0.4, "frappe": 0.4, "whoosh": 0.4,
-       "flash_capcut": 1.0, "flash_camera": 0.45}
+       "flash_capcut": 1.0, "flash_camera": 0.45, "flash_debut": 0.6, "riser_sharp": 0.7, "zoom_souffle": 0.5, "moment_bonne": 0.55, "moment_triste": 0.5, "moment_victoire": 0.55, "moment_boom": 0.6, "moment_scratch": 0.5, "moment_criquets": 0.6, "moment_boing": 0.5, "moment_idee": 0.45, "moment_wow": 0.5, "moment_foule": 0.45,
+       "mc_toast_in": 0.5, "mc_toast_out": 0.5, "mc_orb": 0.45, "mc_villager_no": 0.5, "mc_levier": 0.5, "whoosh_leger": 0.22}
 
 
 # arbitre des bruitages : du plus fort au plus discret
-PRIORITE = {"flash_camera": 7, "impact": 6, "sub_drop": 6, "flash_capcut": 5, "whoosh": 4, "whoosh_court": 4,
+PRIORITE = {**{f"moment_{k}": 6 for k in ("bonne", "triste", "victoire", "boom", "scratch", "criquets", "boing", "idee", "wow", "foule")}, "riser_sharp": 6, "mc_toast_in": 5, "mc_toast_out": 5, "flash_camera": 7, "flash_debut": 7, "impact": 6, "sub_drop": 6, "flash_capcut": 5, "whoosh": 4, "whoosh_court": 4,
             "valide": 3, "croix": 3, "frappe": 2, "pop": 2, "pop_sortie": 2, "tick": 1}
 
 
@@ -98,7 +99,11 @@ def build_music(cfg):
         dst = out / "musique" / f"{n}_{name}.wav"
         duck = ("[m][v]sidechaincompress=threshold=0.05:ratio=4:knee=6:attack=150:release=1100:makeup=1[out]" if ducking
                 else "[v]anullsink;[m]anull[out]")
-        graph = (f"[0:a]aresample=48000,aformat=channel_layouts=stereo,volume={gain:.2f}dB,"
+        # « silences_musique » [[a, b]] : la musique s'arrête net sur une chute ou une réaction et reprend net (référence
+        # LAirHisson, rick-morty-ia 2026-10-16) ; rampe de 20 ms pour éviter le clic
+        trous = [(max(0.0, x - a), min(dur, y - a)) for x, y in cfg.get("silences_musique", []) if x < b and y > a]
+        coupe_ = "".join(f"volume='min(1,max(0,max(({x:.3f}-t)/0.02,(t-{y:.3f})/0.02)))':eval=frame," for x, y in trous)
+        graph = (f"[0:a]aresample=48000,aformat=channel_layouts=stereo,volume={gain:.2f}dB,{coupe_}"
                  f"afade=t=in:d={fondu[0] if fondu else 0.02 if net else 0.3},afade=t=out:st={dur - fo:.3f}:d={fo:.3f}[m];"
                  f"[1:a]aresample=48000,aformat=channel_layouts=stereo[v];" + duck)
         run(*src, "-ss", f"{a:.3f}", "-t", f"{dur:.3f}", "-i", str(voice), "-filter_complex", graph, "-map", "[out]",
@@ -136,10 +141,11 @@ def main(vid: str) -> None:
                  if i.get("layer") == 1 and a <= i["at"] < b and not i["file"].startswith("transitions/")]  # son choisi par lui (2026-10-03)
     zooms = read_json(out / "zooms.json")
     if zooms:
-        cues += [(z["at"] - 0.02, "whoosh_court" if z.get("scale", 1) >= 1.5 else "tick", f"zoom{z['at']}") for z in zooms["punch"]]
+        son_z = cfg.get("son_zoom")  # un seul son léger pour tous les zooms, s'il en a choisi un (rick-morty-ia : zoom_souffle)
+        cues += [(z["at"] - 0.02, son_z or ("whoosh_court" if z.get("scale", 1) >= 1.5 else "tick"), f"zoom{z['at']}") for z in zooms["punch"]]
     cues += [(c[0], c[1], f"jeu{c[0]}") for c in cfg.get("sfx", [])]  # événements du jeu
     if cfg.get("entree", "eclaircissement"):  # le hook entre sur le son flash_camera (sa retouche de pokemon-ia, 2026-10-03)
-        cues.append((0.0, "flash_camera", "entree"))
+        cues.append((0.0, cfg.get("son_entree", "flash_camera"), "entree"))  # son_entree : autre son choisi par lui (rick-morty-ia)
     cues = [(round(max(t, 0), 3), s, src) for t, s, src in cues]
     cues, retires = arbitre(cues)
     if retires:
@@ -148,6 +154,15 @@ def main(vid: str) -> None:
     cues = [(t, s) for t, s, _ in cues]
     sfx = [{"file": f"sfx/{s}.wav", "at": t, "layer": 3, "volume": VOL.get(s.split("_")[0] if s.startswith("frappe") else s, 0.4)}
            for t, s in cues]
+    # clips de mèmes incrustés (plan.json "incrustations", rick-morty-ia 2026-10-15) : leur son, ramené à −30 LUFS,
+    # sous la voix (−14) : on l'entend sans qu'il couvre la parole ; hors arbitre (c'est un son continu, pas un bruitage)
+    for inc in read_json(cfg["dir"] / "plan.json", {}).get("incrustations", []):
+        dst = out / "sfx" / f"{inc['id']}.wav"
+        d, v_ = float(inc["dur"]), float(inc.get("vitesse", 1.0))
+        run("-ss", str(inc.get("src", 0)), "-t", f"{d * v_:.3f}", "-i", str(HF / inc["fichier"]), "-vn", "-af",
+            f"atempo={v_},loudnorm=I={inc.get('lufs', -30)}:TP=-6,afade=t=in:d=0.08,afade=t=out:st={max(0.0, d - 0.15):.3f}:d=0.15",
+            "-ar", "48000", "-ac", "2", "-c:a", "pcm_s16le", str(dst))
+        sfx.append({"file": f"sfx/{dst.name}", "at": float(inc["at"]), "layer": 3, "volume": 1.0})
     write_json(out / "plan_final.json", {"mute_main": True, "items": plan["items"] + voice + music + sfx})
     print(f"plan_final.json : {len(plan['items'])} visuels, {len(voice)} clips voix, {len(music)} musiques, {len(sfx)} SFX")
     # mixage de contrôle (voix + musiques + SFX) : niveau intégré et crête, puis supprimé
@@ -172,7 +187,7 @@ def main(vid: str) -> None:
     import re
     i_lufs = float(re.search(r"I:\s+(-?[\d.]+) LUFS", summary).group(1))
     peak = float(re.search(r"Peak:\s+(-?[\d.]+) dBFS", summary).group(1))
-    g_db = min(-14.0 - i_lufs, -1.1 - peak)
+    g_db = min(-14.0 - i_lufs, -1.1 - peak) + float(cfg.get("gain_final", 0.0))  # gain_final (dB) : la crête est tenue par le limiteur du rendu
     if abs(g_db) > 0.2:
         g = 10 ** (g_db / 20)
         plan_final = read_json(out / "plan_final.json")

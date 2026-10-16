@@ -85,8 +85,9 @@ python ~/.claude/skills/economie-tokens/scripts/audit_contexte.py
 | Écrire ou optimiser une app / un script qui appelle l'API Claude (cache, batch, coûts) | [references/api-claude.md](references/api-claude.md) |
 | Rédaction : réponses, documents, scripts, prompts pour d'autres modèles | [references/redaction.md](references/redaction.md) |
 
-## Quand l'utilisateur dit « mode éco » pour la session
+## Mode éco (actif par défaut dans le dépôt de la chaîne, 2026-10-16)
 
+Actif dans toute session, sauf si l'utilisateur dit « mode normal » ou demande une réponse détaillée.
 Applique les 20 réflexes avec rigueur jusqu'à la fin de la session, réponds en 1 à 5 lignes sauf demande contraire,
 annonce les étapes coûteuses avant de les lancer (« ça va lire ~40 fichiers via un sous-agent, OK ? ») et propose
 `/compact` ou `/clear` aux changements de sujet.

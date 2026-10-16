@@ -44,7 +44,7 @@ says so and nothing is guessed.
 French gap (creneau) and the season (tendance) when they are missing, and prints the ideas ranked
 by a transparent score out of 13 (see GRILLE below). Fields written by Claude: titre, type,
 intention (divertissement, comparatif, tutoriel, actualité: shown, not scored), multiple, vues
-(best proof), faisabilite 1-3, urgence 0-2, apprentissages -1..1, and optionally creneau,
+(best proof) or, for a crossed idea, morceaux [{role, source, multiple, vues}] (proof = weakest piece), faisabilite 1-3, urgence 0-2, apprentissages -1..1, and optionally creneau,
 creneau_concept, demande_seeds, pic (AAAA-MM-JJ or MM-JJ, a known date: Halloween, a game release)
 or tendance_mot, sondage (true: the option that won the channel's Community poll: demand 2). A peak within 60 days adds 1 to urgence (max 2). Season and intention from
 youtube-seo-skills (deeployCO, MIT).
@@ -62,7 +62,7 @@ HERE = Path(__file__).resolve().parent
 SWIPE = HERE / "swipe.py"
 OWN = ("letsar555", "tsar rouge555")
 OWN_URL = "https://www.youtube.com/@letsar555/videos"
-GRILLE = """preuve 0-3 (log2 du multiple / 2, divisé par 2 sous 10 000 vues) + faisabilité 1-3 + créneau FR
+GRILLE = """preuve 0-3 (log2 du multiple / 2, divisé par 2 sous 10 000 vues ; idée croisée : son morceau le plus faible) + faisabilité 1-3 + créneau FR
 (libre 2, partiel 1, pris 0) + urgence 0-2 (+1 si un pic saisonnier tombe dans les 60 jours) + demande 0-2
 (autocomplétion YouTube) + apprentissages -1..1 = /13. Une donnée non mesurée (créneau, demande) vaut 0 : elle
 ne peut pas faire monter une idée ; le maximum possible et la confiance (élevée, moyenne, faible) s'affichent"""
@@ -522,6 +522,16 @@ def proof(multiple, views):
     return round(p / 2 if (views or 0) < 10000 else p, 2)
 
 
+def idea_proof(i):
+    """(points, multiple shown, measured?) : a crossed idea (morceaux) is worth its weakest piece."""
+    pieces = i.get("morceaux")
+    if not pieces:
+        return proof(i.get("multiple"), i.get("vues")), i.get("multiple", "?"), bool(i.get("multiple"))
+    weakest = min(pieces, key=lambda x: proof(x.get("multiple"), x.get("vues")))
+    return (proof(weakest.get("multiple"), weakest.get("vues")), f"croisée, min {weakest.get('multiple', '?')}",
+            all(x.get("multiple") for x in pieces))
+
+
 def grille(a):
     files = [x for x in a if not x.startswith("--")]
     if not files:
@@ -556,17 +566,18 @@ def grille(a):
         if dem is None:
             dem, sugg = demand(i.get("demande_seeds") or [])
         gap = gap if gap in ("libre", "partiel", "pris") else None
-        unknown = [k for k, known in (("créneau", gap is not None), ("demande", dem is not None), ("preuve", bool(i.get("multiple"))))
+        pts, shown, proven = idea_proof(i)
+        unknown = [k for k, known in (("créneau", gap is not None), ("demande", dem is not None), ("preuve", proven))
                    if not known]
-        parts = {"preuve": proof(i.get("multiple"), i.get("vues")),
+        parts = {"preuve": pts,
                  "faisabilite": max(1, min(3, int(i.get("faisabilite", 2)))),
                  "creneau": {"libre": 2, "partiel": 1, "pris": 0}.get(gap, 0),
                  "urgence": max(0, min(2, int(i.get("urgence", 0)) + (1 if days is not None and -7 <= days <= 60 else 0))),
                  "demande": dem if dem is not None else 0,
                  "apprentissages": max(-1, min(1, float(i.get("apprentissages", 0))))}
         total = round(sum(parts.values()), 2)
-        best = total + (2 if gap is None else 0) + (2 if dem is None else 0) + (3 if not i.get("multiple") else 0)
-        rows.append(dict(i, **{"_parts": parts, "_total": total, "_max_possible": round(best, 2), "_inconnues": unknown,
+        best = total + (2 if gap is None else 0) + (2 if dem is None else 0) + (3 - pts if not proven else 0)
+        rows.append(dict(i, **{"_parts": parts, "_total": total, "_multiple": shown, "_max_possible": round(best, 2), "_inconnues": unknown,
                                "_confiance": "élevée" if not unknown else "moyenne" if len(unknown) == 1 else "faible",
                                "_gap": gap or "?", "_pic_dans": days, "_demande_connue": dem is not None, "_suggestions": sugg}))
     rows.sort(key=lambda r: (-r["_total"], len(r["_inconnues"])))
@@ -585,7 +596,7 @@ def grille(a):
     for n, r in enumerate(rows, 1):
         p = r["_parts"]
         pic = f" (pic dans {r['_pic_dans']} j)" if r.get("_pic_dans") is not None else ""
-        lines.append(f"| {n} | {r.get('titre', '?')} | {r.get('type', '')} | {r.get('intention', '')} | {p['preuve']} ({r.get('multiple', '?')}×) | "
+        lines.append(f"| {n} | {r.get('titre', '?')} | {r.get('type', '')} | {r.get('intention', '')} | {p['preuve']} ({r['_multiple']}×) | "
                      f"{p['faisabilite']} | {p['creneau']} ({CRENEAU_TXT.get(r['_gap'], 'non mesuré (?)')}) | {p['urgence']}{pic} | "
                      f"{p['demande']}{'' if r['_demande_connue'] else ' (?)'} | {p['apprentissages']:+g} | **{r['_total']}** | "
                      f"{r['_confiance']}" + (f" (jusqu'à {r['_max_possible']})" if r["_inconnues"] else "") + " |")

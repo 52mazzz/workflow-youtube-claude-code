@@ -136,6 +136,20 @@ class VeilleTest(unittest.TestCase):
         voted = json.loads(run(VEILLE, "grille", self.d / "idees2.json", "--json", env=self.env).stdout)
         self.assertEqual(voted[0]["_parts"]["demande"], 2)                 # option gagnante du sondage
 
+    def test_idee_croisee(self):
+        base = {"faisabilite": 2, "creneau": "libre", "demande": 0}
+        croisee = dict(base, titre="Croisée", morceaux=[{"role": "format", "multiple": 7.8, "vues": 71777},
+                                                         {"role": "matière", "multiple": 4, "vues": 3664485}])
+        trou = dict(base, titre="Trou", morceaux=[{"role": "format", "multiple": 7.8, "vues": 71777}, {"role": "matière"}])
+        write_json(self.d / "idees.json", [croisee, trou])
+        rows = {r["titre"]: r for r in json.loads(run(VEILLE, "grille", self.d / "idees.json", "--json", env=self.env).stdout)}
+        self.assertEqual(rows["Croisée"]["_parts"]["preuve"], 1.0)        # le morceau le plus faible (4×), pas la moyenne
+        self.assertEqual(rows["Croisée"]["_confiance"], "élevée")
+        self.assertEqual(rows["Trou"]["_parts"]["preuve"], 0.0)           # un morceau sans preuve : 0, et preuve inconnue
+        self.assertIn("preuve", rows["Trou"]["_inconnues"])
+        md = run(VEILLE, "grille", self.d / "idees.json", env=self.env).stdout
+        self.assertIn("croisée, min 4×", md)
+
     def test_unknowns_never_help(self):
         measured = {"titre": "Mesurée", "multiple": 4, "vues": 50000, "faisabilite": 2, "creneau": "pris", "demande": 0}
         partial = {"titre": "Partielle", "multiple": 4, "vues": 50000, "faisabilite": 2}     # créneau et demande inconnus

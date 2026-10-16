@@ -42,6 +42,8 @@ Partout : aucun chiffre, aucun résultat, aucune phrase que la source ne contien
 
 ## 3. La fenêtre de choix
 
+**Le domaine d'abord** (2026-10-16) : s'il n'est pas déjà donné (tour 0 de nouvelle-video, ou la demande), pose seul avant de chercher les candidats : **Quel domaine ?** (`multiSelect`) IA seule / IA + gaming / IA + tech / gaming pur (`preferences.md` § Chaîne) ; tout cocher = peu importe. Les candidats ne viennent que de ces domaines.
+
 Construis **3 ou 4 candidats**, chacun avec sa sorte, sa preuve et sa faisabilité, puis pose le tour 1 (une seule fois, tout ce qui est décidable) :
 
 - **Q1, Quelle idée ?** 3 ou 4 options, une phrase d'idée en intitulé (précédée de `Fille <id>` ou `Indépendant`), la preuve et le coût en description (« 7,0x la médiane de ses Shorts chez LAirHisson, moment réel à 2:42 de la vidéo, images déjà là »). Au moins une fille et une indépendante quand les deux existent. **Recommandé en premier** : le meilleur rapport preuve / faisabilité ; à preuve égale, une fille d'une vidéo publiée sans Short (images déjà montées, elle fait revenir vers la vidéo). Une fille ne se propose qu'après la publication de sa vidéo mère, jamais avant (`references/chaine.md`).

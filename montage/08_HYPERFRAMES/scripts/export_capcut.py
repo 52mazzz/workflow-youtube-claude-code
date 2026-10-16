@@ -187,6 +187,7 @@ def sfx_of(el):
                 cues.append((float(l["barre"]), "croix"))
     if t == "scene_description":
         cues += [(float(l.get("t", 0)) + 0.02, "tick") for l in js("lignes")]
+        cues += [(float(m["t"]), "surligneur") for m in js("surligne") if isinstance(m, dict)]  # trait de surligneur par mot
     if t == "scene_vs":  # chaque IA qui entre, puis la pastille VS
         A, B = (json.loads(v[k]) if isinstance(v.get(k), str) else v.get(k, {}) for k in ("A", "B"))
         cues += [(float(A.get("entree", 0.05)), "pop"), (float(B.get("entree", 1.5)), "pop"), (float(v.get("vs", 3.2)), "impact")]
@@ -202,6 +203,14 @@ def sfx_of(el):
         cues += [(0.0, "whoosh_court"), (0.05, "impact")]
         if float(v.get("plein", 2.5)) < d - 0.3:
             cues.append((float(v.get("plein", 2.5)), "whoosh_court"))
+    if t == "frise":  # sons de Minecraft (2026-10-15) : succès qui entre et sort avec les glissements (0,25 s avant chaque
+        # coupe : ils prennent la place du whoosh), orbe d'XP ou villageois quand l'objet fini se coche, whoosh léger au plus vite du
+        # glissement de la caméra, levier à l'arrivée sur l'objet suivant
+        objets, cur, a = js("objets"), int(v.get("actuel", 0)), float(v.get("a", 0.7))
+        fini = objets[cur - 1].get("etat", "") if 0 < cur <= len(objets) else ""
+        cues += [(-0.25, "mc_toast_in"), (a + 0.4, "whoosh_leger"), (a + 0.85, "mc_levier"), (d - 0.25, "mc_toast_out")]
+        if fini:
+            cues.append((max(0.0, a - 0.25), "mc_orb" if fini == "ok" else "mc_villager_no"))
     if t == "progression":
         cues += [(0.0, "whoosh")] + ([(float(v.get("a", 1.0)), "valide")] if any(x.get("gagnant") for x in js("tests")[int(v.get("actuel", 0)):][:1]) else [])
     if t == "capture":  # tick à chaque ligne surlignée (zones) ou au surlignage unique (a)

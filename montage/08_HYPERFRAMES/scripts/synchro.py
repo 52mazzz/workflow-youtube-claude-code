@@ -13,7 +13,7 @@ quelque chose (carte « LA TRANCHE », logo d'une IA, titre) entre sur le mot qu
 import sys
 from commun import ANALYSE, read_json, remap, video, HF
 
-SCENES = {"partage", "progression", "insert", "scene_fenetre", "scene_vs", "scene_vainqueur", "scene_outro",
+SCENES = {"partage", "progression", "frise", "insert", "scene_fenetre", "scene_vs", "scene_vainqueur", "scene_outro",
           "scene_fond", "scene_mots", "scene_description", "barres"}
 SUIVIS = {"carte", "pastille", "fleche", "reaction", "mot", "titre_jeu", "duel", "capture", "note", "a_venir", "vignette"}
 

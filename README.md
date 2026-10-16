@@ -7,7 +7,7 @@ vidéo), construit avec Claude Code. De l'idée au bilan, chaque étape d'une vi
 contrôles. Le créateur parle à Claude (« nouvelle vidéo », « dérushe pokemon-ia », « bilan vidéo ») ; les skills savent
 quoi lire, quoi écrire, et à quel moment s'arrêter pour lui demander son avis.
 
-Ce dépôt est la copie publique et nettoyée du dépôt de travail, qui est privé (161 commits). Il garde la méthode et le
+Ce dépôt est la copie publique et nettoyée du dépôt de travail, qui est privé (183 commits). Il garde la méthode et le
 code. Les données de la chaîne, les identifiants et les médias sous droits n'y sont pas : voir
 [Ce qui n'est pas publié](#ce-qui-nest-pas-publié).
 
@@ -188,7 +188,7 @@ games), built with Claude Code. From the idea to the review, every step of a vid
 checks. The creator talks to Claude ("nouvelle vidéo", "dérushe pokemon-ia", "bilan vidéo"); the skills know what to
 read, what to write, and when to stop and ask for the creator's opinion. Skills, scripts and messages are in French.
 
-This repository is the cleaned public copy of the working repository, which is private (161 commits). It keeps the
+This repository is the cleaned public copy of the working repository, which is private (183 commits). It keeps the
 method and the code. The channel's data, the credentials and the copyrighted media are left out: see
 [What is not published](#what-is-not-published).
 

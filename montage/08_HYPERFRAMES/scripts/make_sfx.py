@@ -4,13 +4,16 @@
    whoosh, impact grave, montée (reverse swell), sub-drop.
 2. Sons d'interface Kenney (CC0) convertis en WAV.
 3. Sons Pixabay choisis par l'utilisateur (pop), coupés au début du son.
+4. Sons de Minecraft (Mojang) tirés de l'installation du jeu → 04_RESSOURCES/sfx/minecraft/.
 
 Sorties : 04_RESSOURCES/sfx/synth/*.wav (masters) et 08_HYPERFRAMES/assets/sfx/*.wav (utilisés).
-Usage : python scripts/make_sfx.py
+Usage : python scripts/make_sfx.py [nom …]  (avec des noms : refait seulement ces sons synthétisés)
 """
 
+import json
 import shutil
 import subprocess
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -56,10 +59,32 @@ def riser(duration: float) -> str:
 SYNTH = {
     "whoosh": whoosh(0.7, 0.32, 9, 250, 5000),
     "whoosh_court": whoosh(0.35, 0.14, 18, 500, 7000),
+    "whoosh_leger": whoosh(0.28, 0.1, 24, 1200, 9000),  # frise de rick-morty-ia : plus court, plus aigu, plus léger (2026-10-15)
     "impact": impact(1.6, 45, 140, 14, 3.2),
     "sub_drop": impact(2.6, 30, 90, 7, 1.6),
     "riser": riser(1.6),
 }
+
+# Sons de Minecraft (Mojang), tirés de l'installation de Prism Launcher (index des ressources de la 1.21.1) : chemin dans
+# le jeu -> nom utilisé ; écran de frise de rick-morty-ia (2026-10-15). Utilisables en vidéo d'après les règles
+# d'utilisation de Minecraft (LICENCES.md).
+MC_ASSETS = Path.home() / "AppData" / "Roaming" / "ElyPrismLauncher" / "assets"
+MC_INDEX = "17"
+MINECRAFT = {
+    "ui/toast/in.ogg": "mc_toast_in",
+    "ui/toast/out.ogg": "mc_toast_out",
+    "random/orb.ogg": "mc_orb",
+    "mob/villager/no1.ogg": "mc_villager_no",
+    "random/click.ogg": "mc_levier",
+}
+
+
+def mc_objet(chemin: str) -> Path:
+    """Fichier d'un son du jeu (les ressources sont rangées par empreinte, l'index donne la correspondance)."""
+    index = json.loads((MC_ASSETS / "indexes" / f"{MC_INDEX}.json").read_text(encoding="utf-8"))["objects"]
+    h = index[f"minecraft/sounds/{chemin}"]["hash"]
+    return MC_ASSETS / "objects" / h[:2] / h
+
 
 # Sons Kenney (CC0) retenus -> nom utilisé dans le projet
 KENNEY = {
@@ -77,7 +102,35 @@ PIXABAY_DIR = ROOT / "04_RESSOURCES" / "sfx" / "pixabay"
 PIXABAY = {
     "Bubble Pop 06 - Universfield.mp3": [("pop", 0.105, 0.30, ""),
                                          ("pop_sortie", 0.105, 0.30, f"asetrate={RATE * 0.82:.0f},aresample={RATE},")],
+    "surligneur_papier.mp3": [("surligneur", 0.0, 0.54, "")],  # trait de surligneur, choisi le 2026-10-15 (rick-morty-ia)
+    "riser_sharp.mp3": [("riser_sharp", 0.0, 1.85, "")],
+    # bruitages de moments (réussite, raté, surprise…), choisis par Claude sur sa demande du 2026-10-16 (rick-morty-ia) ;
+    # le début est calé sur l'attaque du son (silenceremove), longueur bornée
+    "moment_bonne.mp3": [("moment_bonne", 0.0, 1.3, "silenceremove=start_periods=1:start_threshold=-45dB,")],
+    "moment_triste.mp3": [("moment_triste", 0.0, 2.6, "silenceremove=start_periods=1:start_threshold=-45dB,")],
+    "moment_victoire.mp3": [("moment_victoire", 0.0, 2.5, "silenceremove=start_periods=1:start_threshold=-45dB,")],
+    "moment_boom.mp3": [("moment_boom", 0.0, 1.6, "silenceremove=start_periods=1:start_threshold=-45dB,")],
+    "moment_scratch.mp3": [("moment_scratch", 0.0, 1.0, "silenceremove=start_periods=1:start_threshold=-45dB,")],
+    "moment_criquets.mp3": [("moment_criquets", 0.0, 2.6, "silenceremove=start_periods=1:start_threshold=-45dB,")],
+    "moment_boing.mp3": [("moment_boing", 0.0, 1.2, "silenceremove=start_periods=1:start_threshold=-45dB,")],
+    "moment_idee.mp3": [("moment_idee", 0.0, 1.2, "silenceremove=start_periods=1:start_threshold=-45dB,")],
+    "moment_wow.mp3": [("moment_wow", 0.0, 1.8, "silenceremove=start_periods=1:start_threshold=-45dB,")],
+    "moment_foule.mp3": [("moment_foule", 0.0, 2.6, "silenceremove=start_periods=1:start_threshold=-45dB,")],
+    "zoom_souffle.mp3": [("zoom_souffle", 0.2, 0.88, "")],  # « Whoosh Blow Flutter Short », léger, pour les zooms (choisi le 2026-10-16), blanc du début retiré
 }
+# sons fournis par lui (04_RESSOURCES/sfx/perso) : fichier -> nom ; « python make_sfx.py flash_debut » ne refait que celui-là
+PERSO_DIR = ROOT / "04_RESSOURCES" / "sfx" / "perso"
+PERSO = {"camera_flash_debut.mp3": "flash_debut"}  # son du début de la vidéo (pièce jointe du 2026-10-16, rick-morty-ia)
+
+
+def sons_minecraft() -> None:
+    mc_dir = ROOT / "04_RESSOURCES" / "sfx" / "minecraft"
+    mc_dir.mkdir(parents=True, exist_ok=True)
+    for chemin, name in MINECRAFT.items():
+        master = mc_dir / f"{name}.wav"
+        run(["-i", str(mc_objet(chemin)), "-ar", str(RATE), "-ac", "2", "-c:a", "pcm_s16le", str(master)])
+        shutil.copy(master, PUBLIC_DIR / master.name)
+        print(f"minecraft {chemin} -> {name}")
 
 
 def run(args: list[str]) -> None:
@@ -96,7 +149,10 @@ def main() -> None:
     SYNTH_DIR.mkdir(parents=True, exist_ok=True)
     PUBLIC_DIR.mkdir(parents=True, exist_ok=True)
 
+    seuls = set(sys.argv[1:])
     for name, graph in SYNTH.items():
+        if seuls and name not in seuls:
+            continue
         master = SYNTH_DIR / f"{name}.wav"
         raw = SYNTH_DIR / f"{name}.raw.wav"
         run(["-filter_complex", graph, "-ar", str(RATE), "-c:a", "pcm_f32le", str(raw)])
@@ -106,6 +162,14 @@ def main() -> None:
         raw.unlink()
         shutil.copy(master, PUBLIC_DIR / master.name)
         print(f"synth  {name}")
+    if not seuls or "minecraft" in seuls:
+        sons_minecraft()
+    for src, name in PERSO.items():
+        if not seuls or name in seuls:
+            run(["-i", str(PERSO_DIR / src), "-ar", str(RATE), "-ac", "2", "-c:a", "pcm_s16le", str(PUBLIC_DIR / f"{name}.wav")])
+            print(f"perso  {src} -> {name}")
+    if seuls:
+        return
 
     for src, name in KENNEY.items():
         run(["-i", str(KENNEY_DIR / f"{src}.ogg"), "-ar", str(RATE), "-ac", "2",

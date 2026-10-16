@@ -90,18 +90,17 @@ normale), périmètre si doute. Puis, dans `montage\08_HYPERFRAMES\scripts` (Cap
   d'agent, écran titre, fond d'écran, écran noir sous la voix) et le couvrir de plans de jeu qui collent aux mots ou
   d'une fenêtre animée.
 - Transitions : `glisse_gauche` / `glisse_droite` (push adouci, sans flou, whoosh), `flash` (son CapCut
-  `flash_capcut`), coupes nettes ; **jamais de montée (riser)**. Hook : flash + `flash_camera`.
+  `flash_capcut`), coupes nettes ; pas de montée (riser) sauf un riser court entre l'accroche et la suite (preferences.md § Transitions). Hook : flash + son d'entrée.
 - Musique : **uniquement** les morceaux de `04_RESSOURCES/musiques/perso/` (les siens, et ceux que j'ai trouvés et qu'il a
   gardés après écoute : règle du 2026-10-08, `musique.py`), choisis par `musique.py choisir`, la voix − 13 dB
   par défaut (direction du 2026-10-07, sans ducking, jamais de blanc entre deux musiques ; `musique_lufs`
-  fixe seulement si une vidéo le demande), **aucune musique quand la musique du jeu s'entend** (`commun.fond_sonore` du rush > −60 dB :
-  pas de musique sur ce passage).
+  fixe seulement si une vidéo le demande) ; la musique continue même sur la musique du jeu (preferences.md § Direction).
 
 **Direction « duel lisible et nerveux » (2026-10-07)** : `references/preferences.md` § « Direction de montage » prime sur
 tout le reste. En pratique, dans `plan.json` :
 - accroche : `partage` **ou** `a_venir` (jamais les deux), sinon plans neutres du jeu, `titre_jeu` ou `vignette`, `duel`,
   `minuteur` ;
-- chaque test : `carte` (plein écran 1,2 s seulement), `pastille`, `progression` entre deux tests ;
+- chaque test : `carte` (plein écran 1,2 s seulement) ou frise, `progression` entre deux tests, rien en bas à gauche ;
 - partout : `accelere` sur les générations, `capture` pour la consigne et le code, `fleche` sur ce que fait le jeu,
   `insert`, `soustitre` (phrase entière) environ une fois par minute, Tsar en mème de réaction environ une fois par test (`reaction`, ou
   image générée en `insert`) ;
@@ -167,7 +166,7 @@ puis ajouter toute nouvelle préférence à `references/preferences.md` (le skil
 - « Fais-en des shorts » → proposer 3–5 idées (accroche, déroulé, durée) tirées de `script.md` et `resultats.md`, il choisit ; lui montrer le **script**
   (tableau temps / ce qu'il dit / image / effets) avant de fabriquer.
 - **Un Short se monte avec la direction, comme une vidéo** (2026-10-08) : mêmes étapes 3 à 9 du démarrage rapide, même
-  kit (pastille, carte, mot-clé, flèche, Tsar, accéléré, zooms de lecture, respiration, changements de musique), mêmes
+  kit (carte, mot-clé, flèche, Tsar, accéléré, zooms de lecture, respiration, changements de musique), mêmes
   contrôles, en **format vertical** : `video.json` `"format": "vertical"` → `export_capcut.py` rend les éléments en
   1080×1920 (le kit les place dans la zone sûre d'un Short : repères en haut, mot-clé vers 65 % de la hauteur, Tsar
   au-dessus de l'interface), `rendu.py` recadre chaque rush autour de `cx`, en carré sur fond flou (preferences.md § Shorts) (`"cx"` d'un plan de `plan.json`,

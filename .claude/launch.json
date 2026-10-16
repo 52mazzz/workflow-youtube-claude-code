@@ -4,13 +4,20 @@
     {
       "name": "ecoute-musiques",
       "runtimeExecutable": "python",
-      "runtimeArgs": ["-m", "http.server", "8765", "--bind", "127.0.0.1", "--directory", "montage/04_RESSOURCES/musiques"],
+      "runtimeArgs": [
+        "montage/08_HYPERFRAMES/scripts/serveur_ecoute.py",
+        "8765",
+        "montage/04_RESSOURCES/musiques"
+      ],
       "port": 8765
     },
     {
       "name": "atelier",
       "runtimeExecutable": "python",
-      "runtimeArgs": ["atelier.py", "--sans-navigateur"],
+      "runtimeArgs": [
+        "atelier.py",
+        "--sans-navigateur"
+      ],
       "port": 5555
     }
   ]
