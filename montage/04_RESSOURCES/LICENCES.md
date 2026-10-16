@@ -17,11 +17,13 @@ Aucune musique n'est publiée. `08_HYPERFRAMES/scripts/musique.py` range les mor
 | Fichier | Nom | Auteur | Source | Licence | Lien original | Attribution requise |
 |---|---|---|---|---|---|---|
 | `sfx/kenney_interface-sounds/` → `08_HYPERFRAMES/assets/sfx/` tick, clic, clic_2, croix, valide | Interface Sounds 1.0 | Kenney | kenney.nl | CC0 1.0 (domaine public), texte dans `License.txt` | https://kenney.nl/assets/interface-sounds | Non (crédit apprécié) |
-| `sfx/synth/` → `08_HYPERFRAMES/assets/sfx/` whoosh, whoosh_court, impact, sub_drop, riser | Sons synthétisés pour ce projet | Créés avec FFmpeg (`08_HYPERFRAMES/scripts/make_sfx.py`) | — | Création originale | — | Non |
+| `sfx/synth/` → `08_HYPERFRAMES/assets/sfx/` whoosh, whoosh_court, whoosh_leger, impact, sub_drop, riser | Sons synthétisés pour ce projet | Créés avec FFmpeg (`08_HYPERFRAMES/scripts/make_sfx.py`) | — | Création originale | — | Non |
 
 Non publiés : `pop` et `pop_sortie` (tirés de « Bubble Pop 06 » d'Universfield sur Pixabay), `declic` et `declic_2`
 (déclics d'appareil photo Pixabay) : la licence Pixabay interdit de redistribuer ces fichiers tels quels ;
-`flash_camera` (source non précisée) et `flash_capcut` (bibliothèque de sons de CapCut). `make_sfx.py` refait les sons
+`flash_camera` et `flash_debut` (source non précisée), `flash_capcut` (bibliothèque de sons de CapCut),
+`moment_*`, `zoom_souffle`, `riser_sharp` et `surligneur` (Pixabay), et les sons de Minecraft `mc_*` (Mojang,
+extraits du jeu installé par `make_sfx.py`). `make_sfx.py` refait les sons
 synthétisés et ceux de Kenney ; pour `pop` et `pop_sortie`, il attend le fichier Pixabay dans `sfx/pixabay/`.
 
 ## Polices et assets graphiques
@@ -32,6 +34,7 @@ synthétisés et ceux de Kenney ; pour `pop` et `pop_sortie`, il attend le fichi
 | Police labels / code | JetBrains Mono | JetBrains | Google Fonts | SIL Open Font License 1.1 | https://fonts.google.com/specimen/JetBrains+Mono | Non |
 | Police « OPUS 5.5 » (fenêtre Claude) | DM Serif Display | Colophon Foundry | Google Fonts | SIL Open Font License 1.1 | https://fonts.google.com/specimen/DM+Serif+Display | Non |
 | Police sous-titres | Montserrat | Julieta Ulanovsky | Google Fonts | SIL Open Font License 1.1 | https://fonts.google.com/specimen/Montserrat | Non |
+| Police façon interface de Minecraft (frise) | Monocraft | Idrees Hassan | github.com/IdreesInc/Monocraft | SIL Open Font License 1.1 (`08_HYPERFRAMES/assets/fonts/Monocraft-OFL.txt`) | https://github.com/IdreesInc/Monocraft | Non |
 | Mascotte Tsar (avatar et 6 expressions, `08_HYPERFRAMES/assets/tsar/`) | Tsar | Chaîne TSAR | Fichiers de la chaîne | Propriété de la chaîne, tous droits réservés : hors de la licence du code | — | — |
 | Pastilles `08_HYPERFRAMES/assets/logos/claude.svg` et `chatgpt.svg` | Pastilles neutres | Copie publique | — | Comme le code du dépôt | — | Non |
 

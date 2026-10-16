@@ -139,6 +139,15 @@ h3 { font-size: 13px; font-weight: 650; color: var(--muted); margin: 18px 0 8px;
 .liste { background: var(--surface); border: 1px solid var(--border); border-radius: var(--rayon); box-shadow: var(--ombre); }
 .ligne { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px 16px; align-items: center; padding: 12px 16px; }
 .ligne + .ligne { border-top: 1px solid var(--border); }
+.ligne, .carte.video { position: relative; transition: background .12s, border-color .12s; }
+.ligne .video-titre::after, .carte.video .video-titre::after { content: ""; position: absolute; inset: 0; border-radius: inherit; }
+.ligne .phrase, .carte.video .phrase, .carte.video .bouton, .carte.video .segments-legende a { position: relative; z-index: 1; }
+.ligne:hover { background: var(--surface-2); }
+.ligne:first-child { border-radius: var(--rayon) var(--rayon) 0 0; }
+.ligne:last-child { border-radius: 0 0 var(--rayon) var(--rayon); }
+.ligne:only-child { border-radius: var(--rayon); }
+.carte.video:hover { border-color: var(--border-fort); }
+.ligne:hover .video-titre, .carte.video:hover .video-titre { text-decoration: underline; }
 .ligne .video-titre { font-size: 15px; }
 .ligne .segments { width: 120px; }
 .ligne-droite { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
@@ -212,7 +221,58 @@ details.pause[open] > summary h2::before { content: "▾ "; }
 .vignette { padding: 0; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; background: var(--surface-2); cursor: pointer; text-align: left; }
 .vignette img { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; }
 .vignette span { display: block; padding: 5px 8px; font-size: 12px; color: var(--muted); overflow-wrap: anywhere; }
+.prompts-bloc { margin-bottom: 20px; }
+.prompts-grille { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 16px; margin-top: 12px; }
+.prompt-carte { border: 1px solid var(--border); border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.prompt-tete { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+.prompt-tete h2, .prompt-tete h3, .prompt-carte h4 { margin: 0; }
+.prompt-carte h4 { font-size: 13px; color: var(--muted); font-weight: 600; }
+.joints { grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); }
+.joints .vignette img { object-fit: contain; background: #2a2b31; }
+.vignette.manque { cursor: default; }
+pre.prompt { background: var(--surface-2); padding: 10px 12px; border-radius: 8px; white-space: pre-wrap; max-height: 260px; overflow: auto; font-size: 12px; margin: 0; }
 .notes { margin-top: 22px; padding-top: 16px; border-top: 1px solid var(--border); }
+.notes > summary { cursor: pointer; list-style: none; display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.notes > summary::-webkit-details-marker { display: none; }
+.notes > summary h2::before { content: "▸ "; }
+.notes[open] > summary { margin-bottom: 10px; }
+.notes[open] > summary h2::before { content: "▾ "; }
+.notes[open] > summary .aide { display: none; }
+.pas-nom[data-etape] { cursor: pointer; }
+.pas-nom[data-etape]:hover { color: var(--accent); }
+.pas.vue .pas-nom { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 4px; }
+
+/* ─── vue d'une étape */
+.etape-bloc { margin-bottom: 20px; }
+.puces { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; }
+.puce { padding: 4px 10px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); cursor: pointer;
+  font-size: 13px; font-weight: 600; color: var(--muted); }
+.puce:hover { background: var(--surface-2); }
+.puce.fait { color: var(--ok); }
+.puce.courant { border-color: var(--accent); color: var(--text); }
+.puce.choisie { background: var(--accent); border-color: var(--accent); color: var(--accent-texte); }
+.etape-tete { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px 16px; flex-wrap: wrap; margin-bottom: 6px; }
+.etape-tete h3 { margin: 0; font-size: 19px; letter-spacing: -.01em; }
+.etat-etape { font-size: 12.5px; font-weight: 650; padding: 2px 9px; border-radius: 999px; background: var(--surface-2); color: var(--muted); }
+.etat-etape.fait { color: var(--ok); }
+.etat-etape.courant { background: var(--accent-doux); color: var(--accent); }
+.etape-detail { color: var(--muted); margin: 0 0 12px; }
+.doc { border: 1px solid var(--border); border-radius: 10px; margin-top: 14px; overflow: hidden; }
+.doc-tete { display: flex; justify-content: space-between; align-items: center; gap: 8px 12px; flex-wrap: wrap; padding: 9px 12px;
+  background: var(--surface-2); border-bottom: 1px solid var(--border); }
+.doc-tete .nom { font-weight: 650; font-family: var(--mono); font-size: 13.5px; overflow-wrap: anywhere; }
+.doc-tete .actions { display: flex; gap: 6px; flex-wrap: wrap; }
+.doc-corps { padding: 14px 16px; max-height: 560px; overflow: auto; }
+.doc-corps.vide { color: var(--muted); }
+.editeur { width: 100%; min-height: 460px; display: block; resize: vertical; border: 0; padding: 14px 16px; background: var(--bg);
+  color: var(--text); font-family: var(--mono); font-size: 13px; line-height: 1.55; tab-size: 2; outline: none; }
+.edition-pied { display: flex; justify-content: space-between; align-items: center; gap: 8px 12px; flex-wrap: wrap; padding: 9px 12px;
+  border-top: 1px solid var(--border); background: var(--surface-2); }
+.edition-pied .actions { display: flex; gap: 6px; }
+.bouton[hidden] { display: none; }
+.modifie-pastille { color: var(--accent); font-weight: 700; }
+#v-corps .editeur { min-height: calc(100vh - 190px); border: 1px solid var(--border); border-radius: 8px; }
+#v-corps .edition-pied { border: 0; background: none; padding: 10px 0 0; }
 
 /* ─── markdown */
 .md { font-size: 14.5px; overflow-wrap: anywhere; }
@@ -276,6 +336,7 @@ details.pause[open] > summary h2::before { content: "▾ "; }
     <header class="panneau-tete">
       <div><div class="v-titre" id="v-titre"></div><code id="v-chemin"></code></div>
       <div class="actions">
+        <button class="bouton petit" id="v-modifier" hidden>✎ Modifier</button>
         <button class="bouton petit" id="v-ouvrir">Ouvrir dans l'appli</button>
         <button class="bouton petit" id="v-copier">Copier le chemin</button>
         <button class="bouton icone" data-fermer aria-label="Fermer">×</button>
@@ -290,7 +351,8 @@ details.pause[open] > summary h2::before { content: "▾ "; }
 "use strict";
 const JETON = document.querySelector('meta[name="jeton"]').content;
 const S = { etat: null, git: null, controles: null, fiche: null, erreur: null, chargeGit: false, chargeControles: false,
-            action: null, sortie: null, message: "", dernierFetch: 0, majA: null };
+            action: null, sortie: null, message: "", dernierFetch: 0, majA: null,
+            vue: {}, textes: {}, perimes: new Set(), edition: {}, enregistre: null };   // étape vue par vidéo, fichiers lus (et à relire), brouillons
 const ICONE_COPIE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>';
 const LOGO = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M5 6h14M12 6v13"/></svg>';
 
@@ -360,6 +422,7 @@ async function chargerControles() {
 async function chargerFiche(id) {
   try { S.fiche = await api("/api/video?id=" + enc(id)); }
   catch (e) { S.fiche = { id, erreur: e.message }; }
+  for (const c of Object.keys(S.textes)) if (!(c in S.edition)) S.perimes.add(c);   // à relire : Claude a pu les changer
   rendre();
 }
 function toutActualiser() {
@@ -441,7 +504,7 @@ function blocAFaire() {
   if (S.chargeControles && !c) rang = `<div class="verif">${chargement("Vérification de la chaîne YouTube et du rangement…")}</div>`;
   else if (c && c.erreur) rang = `<p class="aide verif">${h(c.erreur)}</p>`;
   else if (c && c.rangement.length) {
-    rang = `<details class="rangement"><summary>Rangement : ${c.rangement.length} point${c.rangement.length > 1 ? "s" : ""} à regarder</summary>` +
+    rang = `<details class="rangement" data-garde="rangement"><summary>Rangement : ${c.rangement.length} point${c.rangement.length > 1 ? "s" : ""} à regarder</summary>` +
       `<ul>${c.rangement.map(l => `<li>${h(l)}</li>`).join("")}</ul>${phrase("range le dépôt d'après rangement.py")}</details>`;
   }
   return `<section class="bloc"><h2>À faire</h2>${liste}${rang}</section>`;
@@ -469,7 +532,7 @@ function blocVideos() {
     (actives.length ? `<div class="videos">${actives.map(carteVideo).join("")}</div>`
       : `<p class="vide">Aucune vidéo en cours. Pour en lancer une : ${phrase("nouvelle vidéo")}</p>`) + `</section>` +
     (publiees.length ? `<section class="bloc"><h2>Publiées <span class="compte">${publiees.length}</span></h2><div class="liste">${publiees.map(ligneVideo).join("")}</div></section>` : "") +
-    (pause.length ? `<details class="bloc pause"><summary><h2>En pause ou abandonnées <span class="compte">${pause.length}</span></h2></summary>` +
+    (pause.length ? `<details class="bloc pause" data-garde="pause"><summary><h2>En pause ou abandonnées <span class="compte">${pause.length}</span></h2></summary>` +
       `<div class="liste">${pause.map(ligneVideo).join("")}</div></details>` : "");
 }
 
@@ -484,17 +547,17 @@ function blocPC() {
     const lignes = g.lignes.length
       ? `<ul class="pc-etat">${g.lignes.map(l => `<li>${h(l.replace(/ : lance (envoi|maj)\.bat.*$/, ""))}</li>`).join("")}</ul>`
       : `<p class="a-jour">✓ À jour avec l'autre PC</p>`;
-    const commits = cs => `<ul class="commits">${cs.map(c => `<li><span>${h(c.message)}</span><span class="quand">${h(depuis(c.date))} · <span class="mono">${h(c.hash)}</span></span></li>`).join("")}</ul>`;
+    const commits = (cs, cle) => `<ul class="commits" data-garde="${cle}">${cs.map(c => `<li><span>${h(c.message)}</span><span class="quand">${h(depuis(c.date))} · <span class="mono">${h(c.hash)}</span></span></li>`).join("")}</ul>`;
     const recup = `<div class="pc-section"><h3>Envoyé par l'autre PC <span class="compte">${g.a_recuperer.length}</span></h3>` +
-      (g.a_recuperer.length ? commits(g.a_recuperer) : `<p class="aide">Rien à récupérer${S.chargeGit ? "…" : " (vérifié avec GitHub " + (S.dernierFetch ? depuis(new Date(S.dernierFetch).toISOString()) : "au chargement") + ")"}.</p>`) +
+      (g.a_recuperer.length ? commits(g.a_recuperer, "recuperer") : `<p class="aide">Rien à récupérer${S.chargeGit ? "…" : " (vérifié avec GitHub " + (S.dernierFetch ? depuis(new Date(S.dernierFetch).toISOString()) : "au chargement") + ")"}.</p>`) +
       `<div class="rangee"><button class="bouton ${g.a_recuperer.length ? "principal" : ""}" data-agir="maj" ${occupe ? "disabled" : ""}>` +
       `${S.action === "maj" ? '<span class="roue"></span> Récupération…' : "↓ Récupérer (maj)"}</button></div></div>`;
     const rien = !g.modifies.length && !g.a_envoyer.length;
     const ids = [...new Set(g.modifies.map(m => (m.chemin.match(/(?:^|\/)videos\/([a-z0-9-]+)\//) || [])[1]).filter(Boolean))];
     const envoi = `<div class="pc-section"><h3>Pas encore envoyé depuis ce PC <span class="compte">${g.modifies.length + g.a_envoyer.length}</span></h3>` +
       (rien ? `<p class="aide">Rien à envoyer.</p>` : "") +
-      (g.modifies.length ? `<ul class="modifs">${g.modifies.map(m => `<li><span class="code">${h(CODES[m.code] || CODES[m.code[0]] || m.code)}</span><span class="mono">${h(m.chemin)}</span></li>`).join("")}</ul>` : "") +
-      (g.a_envoyer.length ? `<p class="aide">Commits pas encore poussés :</p>${commits(g.a_envoyer)}` : "") +
+      (g.modifies.length ? `<ul class="modifs" data-garde="modifs">${g.modifies.map(m => `<li><span class="code">${h(CODES[m.code] || CODES[m.code[0]] || m.code)}</span><span class="mono">${h(m.chemin)}</span></li>`).join("")}</ul>` : "") +
+      (g.a_envoyer.length ? `<p class="aide">Commits pas encore poussés :</p>${commits(g.a_envoyer, "envoyer")}` : "") +
       `<input class="champ" id="message" maxlength="200" autocomplete="off" placeholder="Message (facultatif), ex. ${h(ids.length === 1 ? ids[0] : "mon-sujet-ia")} : tournage" value="${h(S.message)}">` +
       `<div class="rangee"><button class="bouton ${rien ? "" : "principal"}" data-agir="envoi" ${occupe || rien ? "disabled" : ""}>` +
       `${S.action === "envoi" ? '<span class="roue"></span> Envoi…' : "↑ Envoyer à l'autre PC"}</button></div>` +
@@ -534,10 +597,11 @@ function vueFiche() {
   const tete = `<div class="fiche-tete"><div><h1>${h(f.titre || f.id)}</h1><div class="meta"><code>${h(f.id)}</code>${badge(f.statut)}` +
     `<span>${quand(f)}</span>${f.champs.Tournage ? `<span>tournage : ${h(f.champs.Tournage)}</span>` : ""}${lien}</div></div>` +
     `<div class="actions">${f.dossiers.map(d => `<button class="bouton" data-ouvrir="${h(d.chemin)}">📁 ${h(d.nom)}</button>`).join("")}</div></div>`;
+  const vue = etapeVue(f);
   const pas = f.etapes.map(e => {
     const courant = e.num === cur;
-    return `<li class="pas ${e.fait ? "fait" : courant ? "courant" : ""}"><span class="pas-marque">${e.fait ? "✓" : ""}</span><div>` +
-      `<div class="pas-nom"><span class="etape-num">${h(e.num)}</span> ${h(e.nom)}${e.qui ? `<span class="qui">${h(e.qui)}</span>` : ""}</div>` +
+    return `<li class="pas ${e.fait ? "fait" : courant ? "courant" : ""} ${vue && e.num === vue.num ? "vue" : ""}"><span class="pas-marque">${e.fait ? "✓" : ""}</span><div>` +
+      `<div class="pas-nom" data-etape="${h(e.num)}" title="Voir cette étape en haut"><span class="etape-num">${h(e.num)}</span> ${h(e.nom)}${e.qui ? `<span class="qui">${h(e.qui)}</span>` : ""}</div>` +
       (e.detail ? `<div class="pas-detail">${enLigne(e.detail, liens)}</div>` : "") +
       (courant && f.prochaine.phrase ? phrase(f.prochaine.phrase) : "") +
       (courant && f.prochaine.attente ? `<div class="aide">${attente(f.prochaine)}</div>` : "") +
@@ -545,7 +609,9 @@ function vueFiche() {
       `</div></li>`;
   }).join("");
   const etapesBloc = `<section class="carte"><h2>Étapes · ${f.faites} / ${f.total}</h2><ol class="pas-liste">${pas}</ol>` +
-    (f.notes ? `<div class="notes md">${markdown(f.notes, liens)}</div>` : "") + `</section>`;
+    (f.notes ? `<details class="notes" data-garde="notes"${f.notes.length < 1500 ? " open" : ""}><summary><h2>Notes du suivi</h2>` +
+      `<span class="aide">${f.notes.length < 1500 ? "" : `${Math.round(f.notes.length / 1000)} k caractères · clique pour les lire`}</span></summary>` +
+      `<div class="md">${markdown(f.notes, liens)}</div></details>` : "") + `</section>`;
   const groupes = f.groupes.filter(g => g.fichiers.length).map(g => `<div class="groupe"><h3>${h(g.nom)}</h3><ul class="fichiers-liste">` +
     g.fichiers.map(x => `<li><button class="fichier" data-voir="${h(x.chemin)}"><span class="ico">${h(extension(x.nom))}</span>` +
       `<span class="nom">${h(x.nom)}</span><span class="info">${taille(x.taille)} · ${h(depuis(x.modifie))}</span></button></li>`).join("") + `</ul></div>`).join("");
@@ -553,7 +619,142 @@ function vueFiche() {
     f.images.map(x => `<button class="vignette" data-voir="${h(x.chemin)}"><img src="/api/image?chemin=${enc(x.chemin)}" alt="" loading="lazy"><span>${h(x.nom)}</span></button>`).join("") +
     `</div></div>` : "";
   const fichiersBloc = `<section class="carte"><h2>Fichiers</h2>${groupes || '<p class="vide">Aucun fichier.</p>'}${images}</section>`;
-  return retour + tete + aFaire(f, true) + `<div class="fiche-grille">${etapesBloc}${fichiersBloc}</div>`;
+  return retour + tete + aFaire(f, true) + blocEtape(f, liens) + `<div class="fiche-grille">${etapesBloc}${fichiersBloc}</div>`;
+}
+
+// ─── vue d'une étape : ses fichiers lus et modifiables sur place (par défaut l'étape en cours)
+function etapeVue(f) {
+  if (!f.etapes || !f.etapes.length) return null;
+  const num = S.vue[f.id] || (f.prochaine && f.prochaine.num);
+  return f.etapes.find(e => e.num === num) || f.etapes.find(e => !e.fait) || f.etapes[f.etapes.length - 1];
+}
+function blocEtape(f, liens) {
+  const e = etapeVue(f);
+  if (!e) return "";
+  const cur = f.prochaine && f.prochaine.num, courant = e.num === cur;
+  const puces = `<div class="puces" role="tablist">` + f.etapes.map(x => `<button class="puce ${x.fait ? "fait" : ""} ${x.num === cur ? "courant" : ""} ${x.num === e.num ? "choisie" : ""}" ` +
+    `data-etape="${h(x.num)}" role="tab" aria-selected="${x.num === e.num}" title="${h(x.num + ". " + x.nom)}">${x.fait ? "✓ " : ""}${h(x.num)}</button>`).join("") + `</div>`;
+  const etat = e.fait ? `<span class="etat-etape fait">✓ faite</span>` : courant ? `<span class="etat-etape courant">étape en cours</span>` : `<span class="etat-etape">à venir</span>`;
+  const suite = "";   // la phrase de l'étape en cours est déjà dans le bandeau « Ensuite » juste au-dessus
+  const tete = `<div class="etape-tete"><div><h3><span class="etape-num">${h(e.num)}</span> ${h(e.nom)}</h3>` +
+    `${e.qui ? `<span class="qui">${h(e.qui)}</span>` : ""}</div><div class="rangee">${etat}${suite}</div></div>` +
+    (e.detail ? `<p class="etape-detail">${enLigne(e.detail, liens)}</p>` : "");
+  const docs = e.fichiers.filter(x => x.chemin).map(x => blocDoc(x, liens)).join("");
+  const minis = e.fichiers.some(x => x.miniatures) || e.fichiers.some(x => x.nom === "titres-miniatures.md");
+  const images = minis && f.images.length ? `<div class="doc"><div class="doc-tete"><span class="nom">miniatures/</span>` +
+    `<div class="actions"><button class="bouton petit" data-ouvrir="videos/${h(f.id)}/miniatures">📁 Dossier</button></div></div><div class="doc-corps"><div class="vignettes">` +
+    f.images.map(x => `<button class="vignette" data-voir="${h(x.chemin)}"><img src="/api/image?chemin=${enc(x.chemin)}" alt="" loading="lazy"><span>${h(x.nom)}</span></button>`).join("") +
+    `</div></div></div>` : "";
+  const prompts = minis ? blocPrompts(f, liens) : "";
+  const rien = !docs && !images && !prompts ? `<p class="vide">Cette étape ne laisse pas de fichier à relire ici.</p>` : "";
+  return `<section class="carte etape-bloc"><h2>Étape</h2>${puces}${tete}${docs}${images}${rien}</section>${prompts}`;
+}
+function idEditeur(chemin) { return "ed-" + chemin.replace(/[^a-zA-Z0-9]/g, "_"); }
+function blocDoc(x, liens) {
+  const t = S.textes[x.chemin], brouillon = S.edition[x.chemin];
+  const ouvrirB = x.existe ? `<button class="bouton petit" data-voir="${h(x.chemin)}" title="Lire en grand">⤢ Agrandir</button>` +
+    `<button class="bouton petit" data-ouvrir="${h(x.chemin)}">Ouvrir dans l'appli</button>` : "";
+  if (brouillon !== undefined) {
+    const occupe = S.enregistre === x.chemin, change = !t || brouillon !== t.texte;
+    return `<div class="doc"><div class="doc-tete"><span class="nom">${h(x.nom)} ${change ? '<span class="modifie-pastille" title="Pas encore enregistré">●</span>' : ""}</span></div>` +
+      `<textarea class="editeur" id="${idEditeur(x.chemin)}" data-edite="${h(x.chemin)}" spellcheck="true" lang="fr">${h(brouillon)}</textarea>` +
+      `<div class="edition-pied"><span class="aide">Ctrl+S pour enregistrer · Échap pour annuler</span><div class="actions">` +
+      `<button class="bouton petit" data-annuler="${h(x.chemin)}" ${occupe ? "disabled" : ""}>Annuler</button>` +
+      `<button class="bouton petit principal" data-enregistrer="${h(x.chemin)}" ${occupe || !change ? "disabled" : ""}>${occupe ? '<span class="roue"></span> Enregistrement…' : "Enregistrer"}</button></div></div></div>`;
+  }
+  let corps, modifier = "";
+  if (!x.existe) {
+    corps = `<div class="doc-corps vide">Pas encore écrit.</div>`;
+    if (x.editable) modifier = `<button class="bouton petit" data-modifier="${h(x.chemin)}">✎ Commencer</button>`;
+  } else if (!t) corps = `<div class="doc-corps">${chargement("Lecture…")}</div>`;
+  else if (t.erreur) corps = `<div class="doc-corps vide">${h(t.erreur)}</div>`;
+  else {
+    corps = `<div class="doc-corps" data-garde="doc:${h(x.chemin)}">${rendu(t, liens)}</div>`;
+    if (t.editable) modifier = `<button class="bouton petit" data-modifier="${h(x.chemin)}">✎ Modifier</button>`;
+  }
+  return `<div class="doc"><div class="doc-tete"><span class="nom">${h(x.nom)}</span>` +
+    `<div class="actions">${modifier}${ouvrirB}</div></div>${corps}</div>`;
+}
+function rendu(t, liens) {
+  if (extension(t.nom) === "md") return `<div class="md">${markdown(t.texte, liens)}</div>`;
+  let s = t.texte;
+  if (extension(t.nom) === "json") try { s = JSON.stringify(JSON.parse(s), null, 2); } catch (e) { /* tel quel */ }
+  return `<pre class="json">${h(s)}</pre>`;
+}
+async function chargerTexte(chemin) {
+  if (!S.textes[chemin] || S.textes[chemin].erreur) S.textes[chemin] = null;   // relu en fond : l'ancien reste affiché, à sa place
+  S.perimes.delete(chemin);
+  let t;
+  try { t = await api("/api/fichier?chemin=" + enc(chemin)); }
+  catch (e) { t = { erreur: e.message }; }
+  // commencé à modifier pendant la lecture : garder la version de départ, pour qu'enregistrer voie un conflit
+  if (!(chemin in S.edition) || !S.textes[chemin]) S.textes[chemin] = t;
+  rendre();
+}
+function textesEtape() {
+  const f = S.fiche, e = f && !f.erreur && f.id === route().id ? etapeVue(f) : null;
+  if (e) for (const x of e.fichiers) if (x.chemin && x.existe && (!(x.chemin in S.textes) || S.perimes.has(x.chemin))) chargerTexte(x.chemin);
+}
+
+// ─── édition
+async function modifier(chemin) {
+  let t = S.textes[chemin];
+  const absent = S.fiche && S.fiche.etapes && S.fiche.etapes.some(e => e.fichiers.some(x => x.chemin === chemin && !x.existe));
+  if ((!t || S.perimes.has(chemin)) && !absent) { try { t = S.textes[chemin] = await api("/api/fichier?chemin=" + enc(chemin)); } catch (e) { return toast(e.message); } }
+  if (t && !t.editable) return toast("Ce fichier ne se modifie pas ici : ouvre-le dans l'appli");
+  S.edition[chemin] = t ? t.texte : "";
+  rendre(true);
+  const el = document.getElementById(idEditeur(chemin));
+  if (el) { el.focus(); el.setSelectionRange(0, 0); el.scrollTop = 0; }
+}
+function annuler(chemin) {
+  const t = S.textes[chemin];
+  if (t && S.edition[chemin] !== t.texte && !confirm("Abandonner les changements pas enregistrés ?")) return;
+  delete S.edition[chemin];
+  if (ouvert === chemin && enEdition) { enEdition = false; voir(chemin); }
+  rendre(true);
+}
+async function enregistrer(chemin) {
+  if (S.enregistre || !(chemin in S.edition)) return;
+  const texte = S.edition[chemin], t = S.textes[chemin];
+  S.enregistre = chemin; rendre(true); majVisionneuse();
+  try {
+    const r = await api("/api/ecrire", { chemin, texte, version: t && t.version ? t.version : "" });
+    if (r.conflit) {
+      if (confirm("Le fichier a changé depuis que tu l'as ouvert (Claude ou l'autre PC).\n\nOK : ton texte est copié dans le presse-papiers et la nouvelle version s'affiche, pour y remettre tes changements.\nAnnuler : garder ton brouillon ici.")) {
+        await copier(texte, "Ton texte est copié : la nouvelle version est affichée");
+        delete S.edition[chemin]; delete S.textes[chemin];
+        if (ouvert === chemin) { enEdition = false; voir(chemin); }
+      }
+      return;
+    }
+    if (!r.ok) { toast(r.sortie); return; }
+    S.textes[chemin] = { ...(t || { nom: chemin.split("/").pop(), chemin, editable: true }), texte, version: r.version, tronque: false };
+    delete S.edition[chemin];
+    toast("Enregistré · pense à l'envoyer à l'autre PC");
+    if (ouvert === chemin && enEdition) { enEdition = false; voir(chemin); }
+    chargerFiche(S.fiche.id); chargerGit(false);
+  } catch (e) { toast(e.message); }
+  finally { S.enregistre = null; rendre(true); majVisionneuse(); }
+}
+window.addEventListener("beforeunload", e => { if (Object.keys(S.edition).length) { e.preventDefault(); e.returnValue = ""; } });
+
+function blocPrompts(f, liens) {
+  if (!f.prompts || !f.prompts.length) return "";
+  const dossier = `videos/${f.id}/miniatures`;
+  const cartes = f.prompts.map(p => {
+    const joints = p.joindre.length ? `<div class="vignettes joints">` + p.joindre.map(j => j.chemin
+      ? `<button class="vignette" data-voir="${h(j.chemin)}"><img src="/api/image?chemin=${enc(j.chemin)}" alt="" loading="lazy"><span>${j.role ? `<b>${h(j.role)}</b> · ` : ""}${h(j.nom.split("/").pop())}</span></button>`
+      : `<div class="vignette manque"><span>${j.role ? `<b>${h(j.role)}</b> · ` : ""}${h(j.nom)} (introuvable)</span></div>`).join("") + `</div>`
+      : `<p class="aide">Aucune image à joindre : tout est décrit dans le prompt.</p>`;
+    return `<div class="prompt-carte"><div class="prompt-tete"><h3>${h(p.titre || "Prompt")}</h3>` +
+      `<button class="bouton petit" data-copier="${h(p.prompt)}" data-quoi="Prompt copié : colle-le dans Nano Banana Pro">Copier le prompt</button></div>` +
+      (p.intro ? `<p class="aide">${enLigne(p.intro, liens)}</p>` : "") +
+      `<h4>À joindre</h4>${joints}<pre class="prompt" data-garde="prompt:${h(p.titre)}"><code>${h(p.prompt)}</code></pre></div>`;
+  }).join("");
+  return `<section class="carte prompts-bloc"><div class="prompt-tete"><h2>Prompts des miniatures</h2>` +
+    `<button class="bouton" data-ouvrir="${h(dossier)}">📁 Dossier des miniatures</button></div>` +
+    `<div class="prompts-grille">${cartes}</div></section>`;
 }
 
 // ─── markdown (ce qu'utilisent les fichiers du dépôt : titres, listes, cases, tableaux, citations, code)
@@ -632,10 +833,11 @@ function liste(items, liens) {
 }
 
 // ─── visionneuse
-let ouvert = null;
+let ouvert = null, enEdition = false;
 async function voir(chemin) {
   const v = document.getElementById("visionneuse"), corps = document.getElementById("v-corps");
-  ouvert = chemin;
+  ouvert = chemin; enEdition = false;
+  document.getElementById("v-modifier").hidden = true;
   document.getElementById("v-titre").textContent = chemin.split("/").pop();
   document.getElementById("v-chemin").textContent = chemin;
   v.hidden = false; document.body.style.overflow = "hidden";
@@ -645,6 +847,9 @@ async function voir(chemin) {
   try {
     const f = await api("/api/fichier?chemin=" + enc(chemin));
     if (ouvert !== chemin) return;
+    if (!(chemin in S.edition)) S.textes[chemin] = f;
+    document.getElementById("v-modifier").hidden = !f.editable;
+    if (chemin in S.edition) return modifierVisionneuse();
     const liens = S.fiche && !S.fiche.erreur ? liensDe(S.fiche) : null;
     let html;
     if (extension(f.nom) === "md") html = `<div class="md">${markdown(f.texte, liens)}</div>`;
@@ -656,7 +861,34 @@ async function voir(chemin) {
     corps.scrollTop = 0;
   } catch (e) { corps.innerHTML = `<div class="bandeau">${h(e.message)}</div>`; }
 }
-function fermer() { document.getElementById("visionneuse").hidden = true; document.body.style.overflow = ""; ouvert = null; }
+function modifierVisionneuse() {
+  const t = S.textes[ouvert];
+  if (!t || !t.editable) return;
+  if (!(ouvert in S.edition)) S.edition[ouvert] = t.texte;
+  enEdition = true;
+  document.getElementById("v-modifier").hidden = true;
+  document.getElementById("v-corps").innerHTML = `<textarea class="editeur" id="v-editeur" data-edite="${h(ouvert)}" spellcheck="true" lang="fr"></textarea>` +
+    `<div class="edition-pied" id="v-pied"></div>`;
+  const el = document.getElementById("v-editeur");
+  el.value = S.edition[ouvert]; el.focus(); el.setSelectionRange(0, 0); el.scrollTop = 0;
+  majVisionneuse(); rendre(true);
+}
+function majVisionneuse() {
+  const pied = document.getElementById("v-pied");
+  if (!pied || !enEdition || !ouvert) return;
+  const t = S.textes[ouvert], occupe = S.enregistre === ouvert, change = !t || S.edition[ouvert] !== t.texte;
+  pied.innerHTML = `<span class="aide">${change ? '<span class="modifie-pastille">●</span> pas encore enregistré · ' : ""}Ctrl+S pour enregistrer</span><div class="actions">` +
+    `<button class="bouton petit" data-annuler="${h(ouvert)}" ${occupe ? "disabled" : ""}>Annuler</button>` +
+    `<button class="bouton petit principal" data-enregistrer="${h(ouvert)}" ${occupe || !change ? "disabled" : ""}>${occupe ? '<span class="roue"></span> Enregistrement…' : "Enregistrer"}</button></div>`;
+}
+function fermer() {
+  if (enEdition && ouvert in S.edition && S.textes[ouvert] && S.edition[ouvert] !== S.textes[ouvert].texte &&
+      !confirm("Fermer sans enregistrer tes changements ?")) return;
+  if (enEdition) delete S.edition[ouvert];
+  document.getElementById("visionneuse").hidden = true; document.body.style.overflow = ""; ouvert = null; enEdition = false;
+  rendre(true);
+}
+document.getElementById("v-modifier").addEventListener("click", modifierVisionneuse);
 async function ouvrir(chemin) {
   try { const r = await api("/api/ouvrir", { chemin }); toast(r.ok ? "Ouvert dans l'appli" : r.sortie); }
   catch (e) { toast(e.message); }
@@ -681,27 +913,100 @@ async function agir(quoi) {
 }
 
 // ─── rendu et événements
-function rendre() {
-  const actif = document.activeElement, idActif = actif && actif.id, pos = actif && actif.selectionStart;
-  document.getElementById("barre").innerHTML = vueBarre();
-  document.getElementById("app").innerHTML = route().id ? vueFiche() : vueAccueil();
-  if (idActif && idActif !== "v-ouvrir" && idActif !== "v-copier") {
-    const el = document.getElementById(idActif);
-    if (el && el !== document.activeElement) { el.focus(); if (pos != null && el.setSelectionRange) el.setSelectionRange(pos, pos); }
+// Les actualisations de fond (toutes les minutes, GitHub, YouTube) refont la page : elle n'est remplacée que si elle a
+// changé, jamais pendant un clic ou une sélection (bouton de la souris enfoncé), et chaque élément marqué data-garde
+// (encadré qui défile, section dépliable) garde sa position et son ouverture.
+const R = { appui: false, attente: false, forcer: false, barre: "", app: "" };
+function garder() {
+  const g = {};
+  for (const el of document.querySelectorAll("#app [data-garde]")) g[el.dataset.garde] = { haut: el.scrollTop, ouvert: el.open };
+  return g;
+}
+function remettre(g) {
+  for (const el of document.querySelectorAll("#app [data-garde]")) {
+    const x = g[el.dataset.garde];
+    if (!x) continue;
+    if (el.tagName === "DETAILS") el.open = x.ouvert;
+    if (x.haut) el.scrollTop = x.haut;
   }
 }
+function rendre(force) {
+  if (R.appui) { R.attente = true; R.forcer = R.forcer || !!force; return; }
+  const actif = document.activeElement, idActif = actif && actif.id;
+  const pos = actif && actif.selectionStart, fin = actif && actif.selectionEnd, defil = actif && actif.scrollTop;
+  const barre = vueBarre();
+  if (barre !== R.barre) { document.getElementById("barre").innerHTML = R.barre = barre; }
+  // pendant qu'on tape dans un fichier, les actualisations de fond ne refont pas la page (le texte est dans S.edition)
+  if (!force && actif && actif.classList && actif.classList.contains("editeur") && actif.id !== "v-editeur") return;
+  const f = route().id && S.fiche && S.fiche.id === route().id && !S.fiche.erreur ? S.fiche : null;
+  document.title = f ? `${f.titre || f.id} · Atelier` : "Atelier TSAR";
+  const html = route().id ? vueFiche() : vueAccueil();
+  if (html !== R.app) {
+    const y = window.scrollY, g = garder();
+    document.getElementById("app").innerHTML = R.app = html;
+    remettre(g);
+    if (idActif && !["v-ouvrir", "v-copier", "v-modifier", "v-editeur"].includes(idActif)) {
+      const el = document.getElementById(idActif);
+      if (el && el !== document.activeElement) {
+        el.focus(); if (pos != null && el.setSelectionRange) el.setSelectionRange(pos, fin);
+        if (defil) el.scrollTop = defil;
+        window.scrollTo(0, y);
+      }
+    }
+  }
+  textesEtape();
+}
+document.addEventListener("pointerdown", e => { if (e.button === 0) R.appui = true; }, true);
+function relacher() {
+  if (!R.appui) return;
+  R.appui = false;
+  setTimeout(() => {                       // après le clic qui suit le relâchement, sur la page qu'on a cliquée
+    if (!R.attente || R.appui) return;
+    const force = R.forcer; R.attente = R.forcer = false; rendre(force);
+  }, 0);
+}
+document.addEventListener("pointerup", relacher, true);
+document.addEventListener("pointercancel", relacher, true);
+window.addEventListener("blur", relacher);
+function voirEtape(num, defiler) {
+  if (!S.fiche) return;
+  S.vue[S.fiche.id] = num; rendre(true);
+  const b = document.querySelector(".etape-bloc");
+  if (defiler && b) b.scrollIntoView({ behavior: "smooth", block: "start" });
+}
 document.addEventListener("click", e => {
-  const t = e.target.closest("[data-copier],[data-voir],[data-ouvrir],[data-agir],[data-fermer],[data-actualiser]");
+  const t = e.target.closest("[data-copier],[data-voir],[data-ouvrir],[data-agir],[data-fermer],[data-actualiser],[data-etape],[data-modifier],[data-annuler],[data-enregistrer]");
   if (!t) return;
-  if (t.hasAttribute("data-copier")) copier(t.dataset.copier);
+  if (t.hasAttribute("data-etape")) voirEtape(t.dataset.etape, t.classList.contains("pas-nom"));
+  else if (t.hasAttribute("data-modifier")) modifier(t.dataset.modifier);
+  else if (t.hasAttribute("data-annuler")) annuler(t.dataset.annuler);
+  else if (t.hasAttribute("data-enregistrer")) enregistrer(t.dataset.enregistrer);
+  else if (t.hasAttribute("data-copier")) copier(t.dataset.copier, t.dataset.quoi);
   else if (t.hasAttribute("data-voir")) { e.preventDefault(); voir(t.dataset.voir); }
   else if (t.hasAttribute("data-ouvrir")) ouvrir(t.dataset.ouvrir);
   else if (t.hasAttribute("data-agir")) agir(t.dataset.agir);
   else if (t.hasAttribute("data-fermer")) fermer();
   else if (t.hasAttribute("data-actualiser")) toutActualiser();
 });
-document.addEventListener("input", e => { if (e.target.id === "message") S.message = e.target.value; });
+document.addEventListener("input", e => {
+  if (e.target.id === "message") S.message = e.target.value;
+  const chemin = e.target.dataset && e.target.dataset.edite;
+  if (!chemin) return;
+  S.edition[chemin] = e.target.value;
+  const t = S.textes[chemin], change = !t || e.target.value !== t.texte;
+  for (const b of document.querySelectorAll(`#app [data-enregistrer="${CSS.escape(chemin)}"]`)) b.disabled = !change || !!S.enregistre;
+  const nom = e.target.closest(".doc") && e.target.closest(".doc").querySelector(".doc-tete .nom");
+  if (nom) nom.innerHTML = `${h(chemin.split("/").pop())} ${change ? '<span class="modifie-pastille" title="Pas encore enregistré">●</span>' : ""}`;
+  majVisionneuse();
+});
 document.addEventListener("keydown", e => {
+  const chemin = e.target.dataset && e.target.dataset.edite;
+  if (chemin && (e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") { e.preventDefault(); enregistrer(chemin); return; }
+  if (chemin && e.key === "Tab" && !e.shiftKey) {                       // une tabulation dans le texte, pas le bouton suivant
+    e.preventDefault(); const el = e.target, a = el.selectionStart;
+    el.setRangeText("  ", a, el.selectionEnd, "end"); el.dispatchEvent(new Event("input", { bubbles: true })); return;
+  }
+  if (e.key === "Escape" && chemin && e.target.id !== "v-editeur") { annuler(chemin); return; }
   if (e.key === "Escape" && !document.getElementById("visionneuse").hidden) fermer();
   if (e.key === "Enter" && e.target.id === "message") { const b = document.querySelector('[data-agir="envoi"]'); if (b && !b.disabled) agir("envoi"); }
 });

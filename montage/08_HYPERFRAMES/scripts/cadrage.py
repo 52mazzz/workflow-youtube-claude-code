@@ -20,6 +20,7 @@ Unités de position : celles de CapCut (x, y en demi-largeur / demi-hauteur du c
 """
 from __future__ import annotations
 
+import numpy as np
 import math
 
 RAMPE, SORTIE, TENU, BORD = 0.2, 0.35, 3.0, 0.25
@@ -106,15 +107,19 @@ def plan_zooms(segs: list[dict], punch: list[dict], slow: dict | None) -> dict:
             b = min(a + p["dur"], end)
             if b - a < 0.1:
                 continue
-            ramp = min(RAMPE + 0.25 * min(1.0, float(p['scale']) - 1.0), (b - a) / 3)
-            fin = end if end - b <= TENU else b + SORTIE
-            envs.append((a, a + ramp, b, fin, float(p["scale"]), float(p.get("x", 0.0)), float(p.get("y", 0.0))))
+            ramp = (b - a) if p.get("lent") else float(p["rampe"]) if p.get("rampe") else min(RAMPE + 0.25 * min(1.0, float(p['scale']) - 1.0), (b - a) / 3)
+            fin = min(end, b + 1 / 60) if p.get("net") else end if end - b <= TENU else b + SORTIE  # net : retour en une image
+            chemin = [(t - st, x, y) for t, x, y in p.get("chemin", [])]   # suivi d'un objet : (temps du plan, x, y)
+            envs.append((a, a + ramp, b, fin, float(p["scale"]), float(p.get("x", 0.0)), float(p.get("y", 0.0)), chemin))
 
         def valeur(t):
             k, x, y = 1.0, 0.0, 0.0
-            for a, plein, b, fin, sc, px, py in envs:
+            for a, plein, b, fin, sc, px, py, chemin in envs:
                 if t < a or t > fin:
                     continue
+                if chemin:                                                 # position interpolée sur la trajectoire
+                    ts_ = [c[0] for c in chemin]
+                    px, py = float(np.interp(t, ts_, [c[1] for c in chemin])), float(np.interp(t, ts_, [c[2] for c in chemin]))
                 w = lisse((t - a) / (plein - a)) if t < plein else 1.0 if t <= b or fin == end else 1 - lisse((t - b) / (fin - b))
                 k *= 1 + (sc - 1) * w
                 x, y = px * w, py * w
@@ -127,9 +132,15 @@ def plan_zooms(segs: list[dict], punch: list[dict], slow: dict | None) -> dict:
             for r in remises_de(slow, t0, t1):
                 if 1 / 60 < r - st < end:
                     ts.update({r - st - 1 / 60, r - st})
-        for a, plein, b, fin, *_ in envs:
+        for a, plein, b, fin, sc_, px_, py_, chemin in envs:
+            if chemin:                                                     # suivi : 12 points par seconde sur tout le zoom
+                n = max(1, round((b - a) * 12))
+                ts.update(min(end, a + (b - a) * k / n) for k in range(n + 1))
+                ts.update(c[0] for c in chemin if a <= c[0] <= b)
             for x0, x1 in ((a, plein), (b, fin) if fin != end else (b, b)):   # montées et sorties : un point par image
-                n = max(1, round((x1 - x0) * 60))
+                # au-delà de 0,5 s (avancée lente d'inventaire), 12 points par seconde suffisent : un point par image
+                # donnait une expression de plus de 100 Ko et FFmpeg manquait de mémoire (rick-morty-ia, 2026-10-16)
+                n = max(1, round((x1 - x0) * (60 if x1 - x0 <= 0.5 else 12)))
                 ts.update(min(end, x0 + (x1 - x0) * k / n) for k in range(n + 1))
             ts.add(min(end, b))
         pts = []
