@@ -80,3 +80,6 @@ montage/08_HYPERFRAMES/assets/sfx/riser_sharp.wav
 montage/08_HYPERFRAMES/assets/sfx/surligneur.wav
 montage/08_HYPERFRAMES/assets/sfx/flash_*.wav
 montage/08_HYPERFRAMES/assets/sfx/pop*.wav
+
+# Copie publique : workflow de la vitrine, propre au dépôt de travail (il pousse ici et sur le portfolio)
+.github/workflows/vitrine.yml
