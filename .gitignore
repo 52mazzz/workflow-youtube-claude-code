@@ -61,7 +61,7 @@ montage/07_OUTILS/
 montage/08_HYPERFRAMES/assets/vendor/
 
 # Copie publique : données de la chaîne et de production, jamais publiées
-videos/
+/videos/
 config/youtube/
 montage/02_ANALYSE/
 montage/04_RESSOURCES/assets/
@@ -70,3 +70,13 @@ montage/08_HYPERFRAMES/videos/*
 !montage/08_HYPERFRAMES/videos/_exemple/
 !montage/08_HYPERFRAMES/videos/_exemple-direction/
 montage/08_HYPERFRAMES/shorts/
+
+# Copie publique : sons sans licence de redistribution (Pixabay, Mojang, sons perso ou CapCut), voir LICENCES.md
+montage/04_RESSOURCES/sfx/minecraft/
+montage/08_HYPERFRAMES/assets/sfx/mc_*.wav
+montage/08_HYPERFRAMES/assets/sfx/moment_*.wav
+montage/08_HYPERFRAMES/assets/sfx/zoom_souffle.wav
+montage/08_HYPERFRAMES/assets/sfx/riser_sharp.wav
+montage/08_HYPERFRAMES/assets/sfx/surligneur.wav
+montage/08_HYPERFRAMES/assets/sfx/flash_*.wav
+montage/08_HYPERFRAMES/assets/sfx/pop*.wav
